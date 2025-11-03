@@ -2,10 +2,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Container, Graphics, Text, Texture, Assets } from 'pixi.js';
 import { extend } from '@pixi/react';
-import { ParticleSystem } from './ParticleSystem';
-import { fireEffect, waterEffect, explosionEffect, magicEffect, createTextureEffect } from './ParticlePresets';
+// 导入增强版粒子系统
 import { ParticleSystemEnhanced } from './ParticleSystemEnhanced';
-
+import { fireEffect, waterEffect, explosionEffect, magicEffect, createTextureEffect } from './ParticlePresets';
 
 // 注册组件
 extend({
@@ -94,8 +93,8 @@ export const ParticleDemo = () => {
   
   return (
     <pixiContainer>
-      {/* 粒子系统 */}
-      <ParticleSystem
+      {/* 使用增强版粒子系统 */}
+      <ParticleSystemEnhanced
         config={getSelectedConfig()}
         play={play}
         position={[400, 300]}
