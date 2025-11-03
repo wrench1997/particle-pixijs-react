@@ -4,6 +4,8 @@ import { Container, Graphics, Text, Texture, Assets } from 'pixi.js';
 import { extend } from '@pixi/react';
 import { ParticleSystem } from './ParticleSystem';
 import { fireEffect, waterEffect, explosionEffect, magicEffect, createTextureEffect } from './ParticlePresets';
+import { ParticleSystemEnhanced } from './ParticleSystemEnhanced';
+
 
 // 注册组件
 extend({
