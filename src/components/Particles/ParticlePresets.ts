@@ -1,0 +1,550 @@
+// src/components/Particles/ParticlePresets.ts
+// src/components/Particles/ParticlePresets.ts
+import type { ParticleConfig } from './ParticleSystem';
+import * as PIXI from 'pixi.js';
+
+// 火焰效果
+export const fireEffect: ParticleConfig = {
+  lifetime: {
+    min: 0.5,
+    max: 0.5
+  },
+  frequency: 0.008,
+  spawnChance: 1,
+  particlesPerWave: 1,
+  emitterLifetime: 0, // 无限
+  maxParticles: 300,
+  pos: {
+    x: 0,
+    y: 0
+  },
+  addAtBack: false,
+  behaviors: [
+    {
+      type: 'alpha',
+      config: {
+        alpha: {
+          list: [
+            {
+              value: 0.8,
+              time: 0
+            },
+            {
+              value: 0.1,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'scale',
+      config: {
+        scale: {
+          list: [
+            {
+              value: 1,
+              time: 0
+            },
+            {
+              value: 0.3,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'color',
+      config: {
+        color: {
+          list: [
+            {
+              value: "fb1010",
+              time: 0
+            },
+            {
+              value: "f5b830",
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'moveSpeed',
+      config: {
+        speed: {
+          list: [
+            {
+              value: 100,
+              time: 0
+            },
+            {
+              value: 50,
+              time: 1
+            }
+          ],
+          isStepped: false
+        },
+      }
+    },
+    {
+      type: 'rotationStatic',
+      config: {
+        min: 0,
+        max: 360
+      }
+    },
+    {
+      type: 'spawnShape',
+      config: {
+        type: 'torus',
+        data: {
+          x: 0,
+          y: 0,
+          radius: 10
+        }
+      }
+    }
+  ]
+};
+
+// 水效果
+export const waterEffect: ParticleConfig = {
+  lifetime: {
+    min: 0.8,
+    max: 0.8
+  },
+  frequency: 0.01,
+  spawnChance: 1,
+  particlesPerWave: 2,
+  emitterLifetime: 0, // 无限
+  maxParticles: 200,
+  pos: {
+    x: 0,
+    y: 0
+  },
+  addAtBack: false,
+  behaviors: [
+    {
+      type: 'alpha',
+      config: {
+        alpha: {
+          list: [
+            {
+              value: 0.7,
+              time: 0
+            },
+            {
+              value: 0.1,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'scale',
+      config: {
+        scale: {
+          list: [
+            {
+              value: 0.5,
+              time: 0
+            },
+            {
+              value: 0.2,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'color',
+      config: {
+        color: {
+          list: [
+            {
+              value: "3399ff",
+              time: 0
+            },
+            {
+              value: "99ccff",
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'moveSpeed',
+      config: {
+        speed: {
+          list: [
+            {
+              value: 80,
+              time: 0
+            },
+            {
+              value: 40,
+              time: 1
+            }
+          ],
+          isStepped: false
+        },
+      }
+    },
+    {
+      type: 'rotationStatic',
+      config: {
+        min: 0,
+        max: 360
+      }
+    },
+    {
+      type: 'spawnShape',
+      config: {
+        type: 'circle',
+        data: {
+          x: 0,
+          y: 0,
+          radius: 20
+        }
+      }
+    }
+  ]
+};
+
+// 爆炸效果
+export const explosionEffect: ParticleConfig = {
+  lifetime: {
+    min: 0.5,
+    max: 0.7
+  },
+  frequency: 0.001,
+  spawnChance: 1,
+  particlesPerWave: 20,
+  emitterLifetime: 0.1, // 短暂爆发
+  maxParticles: 100,
+  pos: {
+    x: 0,
+    y: 0
+  },
+  addAtBack: false,
+  behaviors: [
+    {
+      type: 'alpha',
+      config: {
+        alpha: {
+          list: [
+            {
+              value: 1,
+              time: 0
+            },
+            {
+              value: 0,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'scale',
+      config: {
+        scale: {
+          list: [
+            {
+              value: 1.2,
+              time: 0
+            },
+            {
+              value: 0.2,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'color',
+      config: {
+        color: {
+          list: [
+            {
+              value: "ff3300",
+              time: 0
+            },
+            {
+              value: "ffcc00",
+              time: 0.5
+            },
+            {
+              value: "999999",
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'moveSpeed',
+      config: {
+        speed: {
+          list: [
+            {
+              value: 200,
+              time: 0
+            },
+            {
+              value: 100,
+              time: 0.5
+            },
+            {
+              value: 50,
+              time: 1
+            }
+          ],
+          isStepped: false
+        },
+      }
+    },
+    {
+      type: 'rotationStatic',
+      config: {
+        min: 0,
+        max: 360
+      }
+    },
+    {
+      type: 'spawnShape',
+      config: {
+        type: 'circle',
+        data: {
+          x: 0,
+          y: 0,
+          radius: 5
+        }
+      }
+    }
+  ]
+};
+
+// 魔法效果
+export const magicEffect: ParticleConfig = {
+  lifetime: {
+    min: 1,
+    max: 1.5
+  },
+  frequency: 0.02,
+  spawnChance: 1,
+  particlesPerWave: 1,
+  emitterLifetime: 0, // 无限
+  maxParticles: 100,
+  pos: {
+    x: 0,
+    y: 0
+  },
+  addAtBack: false,
+  behaviors: [
+    {
+      type: 'alpha',
+      config: {
+        alpha: {
+          list: [
+            {
+              value: 0,
+              time: 0
+            },
+            {
+              value: 0.8,
+              time: 0.2
+            },
+            {
+              value: 0,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'scale',
+      config: {
+        scale: {
+          list: [
+            {
+              value: 0.2,
+              time: 0
+            },
+            {
+              value: 0.5,
+              time: 0.5
+            },
+            {
+              value: 0.2,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'color',
+      config: {
+        color: {
+          list: [
+            {
+              value: "9966ff",
+              time: 0
+            },
+            {
+              value: "cc99ff",
+              time: 0.5
+            },
+            {
+              value: "ffffff",
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'moveSpeed',
+      config: {
+        speed: {
+          list: [
+            {
+              value: 50,
+              time: 0
+            },
+            {
+              value: 30,
+              time: 1
+            }
+          ],
+          isStepped: false
+        },
+      }
+    },
+    {
+      type: 'rotationStatic',
+      config: {
+        min: 0,
+        max: 360
+      }
+    },
+    {
+      type: 'spawnShape',
+      config: {
+        type: 'torus',
+        data: {
+          x: 0,
+          y: 0,
+          radius: 30
+        }
+      }
+    }
+  ]
+};
+
+// 创建带纹理的粒子效果
+export const createTextureEffect = (texture: PIXI.Texture): ParticleConfig => {
+  return {
+    lifetime: {
+      min: 0.6,
+      max: 0.8
+    },
+    frequency: 0.01,
+    spawnChance: 1,
+    particlesPerWave: 1,
+    emitterLifetime: 0, // 无限
+    maxParticles: 100,
+    pos: {
+      x: 0,
+      y: 0
+    },
+    addAtBack: false,
+    behaviors: [
+      {
+        type: 'alpha',
+        config: {
+          alpha: {
+            list: [
+              {
+                value: 0.8,
+                time: 0
+              },
+              {
+                value: 0.1,
+                time: 1
+              }
+            ],
+          },
+        }
+      },
+      {
+        type: 'scale',
+        config: {
+          scale: {
+            list: [
+              {
+                value: 1,
+                time: 0
+              },
+              {
+                value: 0.3,
+                time: 1
+              }
+            ],
+          },
+        }
+      },
+      {
+        type: 'moveSpeed',
+        config: {
+          speed: {
+            list: [
+              {
+                value: 100,
+                time: 0
+              },
+              {
+                value: 50,
+                time: 1
+              }
+            ],
+            isStepped: false
+          },
+        }
+      },
+      {
+        type: 'rotationStatic',
+        config: {
+          min: 0,
+          max: 360
+        }
+      },
+      {
+        type: 'spawnShape',
+        config: {
+          type: 'torus',
+          data: {
+            x: 0,
+            y: 0,
+            radius: 20
+          }
+        }
+      },
+      {
+        type: 'textureSingle',
+        config: {
+          texture: texture
+        }
+      }
+    ]
+  };
+};
