@@ -1,5 +1,5 @@
 // src/components/Particles/behaviors/ShapeBehaviors.ts
-import { IBehavior } from '../ParticleBehaviorSystem';
+import type { IBehavior } from '../ParticleBehaviorSystem';
 
 // 基础形状生成行为
 export class SpawnShapeBehavior implements IBehavior {

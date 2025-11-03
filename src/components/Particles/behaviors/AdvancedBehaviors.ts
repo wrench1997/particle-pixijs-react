@@ -1,5 +1,5 @@
 // src/components/Particles/behaviors/AdvancedBehaviors.ts
-import { IBehavior } from '../ParticleBehaviorSystem';
+import type { IBehavior } from '../ParticleBehaviorSystem';
 import * as PIXI from 'pixi.js';
 
 // 路径跟随行为

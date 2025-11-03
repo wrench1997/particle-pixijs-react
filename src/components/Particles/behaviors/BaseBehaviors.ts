@@ -1,5 +1,5 @@
 // src/components/Particles/behaviors/BaseBehaviors.ts
-import { IBehavior } from '../ParticleBehaviorSystem';
+import type { IBehavior } from '../ParticleBehaviorSystem';
 
 // Alpha行为
 export class AlphaBehavior implements IBehavior {

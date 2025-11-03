@@ -17,6 +17,10 @@ import {
   GravityBehavior, DragBehavior
 } from './behaviors/AdvancedBehaviors';
 
+// 导入形状行为
+import { SpawnShapeBehavior, PolygonShapeBehavior, ImageShapeBehavior } from './behaviors/ShapeBehaviors';
+
+
 // 注册组件
 extend({
   Container,
@@ -372,76 +376,6 @@ class EnhancedParticle {
     const t = (progress - startTime) / (endTime - startTime);
     
     return startValue + (endValue - startValue) * t;
-  }
-}
-
-// 形状生成行为
-class SpawnShapeBehavior implements IBehavior {
-  type = 'spawnShape';
-
-  init(particle: any, config: any): void {
-    if (!config.type) return;
-    
-    switch (config.type) {
-      case 'torus':
-      case 'circle':
-        if (config.data && config.data.radius !== undefined) {
-          const radius = config.data.radius;
-          const angle = Math.random() * Math.PI * 2;
-          
-          if (config.type === 'torus') {
-            // 环形
-            particle.x += Math.cos(angle) * radius;
-            particle.y += Math.sin(angle) * radius;
-          } else {
-            // 圆形
-            const r = Math.sqrt(Math.random()) * radius;
-            particle.x += Math.cos(angle) * r;
-            particle.y += Math.sin(angle) * r;
-          }
-          
-          // 设置初始速度方向（从中心向外）
-          const speed = particle.speedList.length > 0 ? particle.speedList[0].value : 100;
-          particle.velocity.x = Math.cos(angle) * speed;
-          particle.velocity.y = Math.sin(angle) * speed;
-        }
-        break;
-        
-      case 'rect':
-        if (config.data) {
-          const { width, height } = config.data;
-          particle.x += (Math.random() - 0.5) * width;
-          particle.y += (Math.random() - 0.5) * height;
-          
-          // 设置随机速度方向
-          const angle = Math.random() * Math.PI * 2;
-          const speed = particle.speedList.length > 0 ? particle.speedList[0].value : 100;
-          particle.velocity.x = Math.cos(angle) * speed;
-          particle.velocity.y = Math.sin(angle) * speed;
-        }
-        break;
-        
-      case 'line':
-        if (config.data) {
-          const { x1, y1, x2, y2 } = config.data;
-          const t = Math.random();
-          particle.x += x1 + (x2 - x1) * t;
-          particle.y += y1 + (y2 - y1) * t;
-          
-          // 设置垂直于线的速度方向
-          const dx = x2 - x1;
-          const dy = y2 - y1;
-          const angle = Math.atan2(dy, dx) + Math.PI / 2;
-          const speed = particle.speedList.length > 0 ? particle.speedList[0].value : 100;
-          particle.velocity.x = Math.cos(angle) * speed;
-          particle.velocity.y = Math.sin(angle) * speed;
-        }
-        break;
-    }
-  }
-
-  update(particle: any, deltaTime: number, progress: number): void {
-    // 生成形状只在初始化时应用，不需要更新
   }
 }
 
