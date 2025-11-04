@@ -12,12 +12,12 @@
 src/
 ├── components/
 │   ├── Particles/
-│   │   ├── ParticleDemo.tsx          # 粒子系统演示界面
-│   │   ├── ParticleSystem.tsx        # 基础粒子系统
-│   │   ├── ParticleSystemEnhanced.tsx# 增强版粒子系统
-│   │   ├── ParticlePresets.ts        # 各种粒子效果预设
-│   │   ├── ParticleBehaviorSystem.ts # 行为注册与对象池
-│   │   └── behaviors/                # 粒子行为定义模块
+│   │   ├── ParticleDemo.tsx           # 粒子系统演示界面
+│   │   ├── ParticleSystem.tsx         # 基础粒子系统
+│   │   ├── ParticleSystemEnhanced.tsx # 增强版粒子系统
+│   │   ├── ParticlePresets.ts         # 各种粒子效果预设
+│   │   ├── ParticleBehaviorSystem.ts  # 行为注册与对象池
+│   │   └── behaviors/                 # 粒子行为定义模块
 │   │       ├── BaseBehaviors.ts
 │   │       ├── AdvancedBehaviors.ts
 │   │       └── ShapeBehaviors.ts
@@ -48,21 +48,35 @@ yarn add pixi.js @pixi/react
 ### 1️⃣ 在 React 中引入和渲染粒子系统
 
 ```tsx
-import { Stage } from '@pixi/react';
+import { Application } from '@pixi/react';
 import { ParticleSystemEnhanced } from './components/Particles/ParticleSystemEnhanced';
-import { fireEffect } from './components/Particles/ParticlePresets';
+import { createFireTextureEffect } from './components/Particles/ParticlePresets';
+import { useEffect, useState } from 'react';
+import { Assets, Texture } from 'pixi.js';
 
-export default function App() {
+export default function TexturedParticles() {
+  const [texture, setTexture] = useState<Texture | null>(null);
+  
+  useEffect(() => {
+    const loadTexture = async () => {
+      const tex = await Assets.load('assets/particle.png');
+      setTexture(tex);
+    };
+    
+    loadTexture();
+  }, []);
+  
+  if (!texture) return null;
+  
   return (
-    <Stage width={800} height={600} options={{ background: 0x000000 }}>
+    <Application width={800} height={600} options={{ background: 0x000000 }}>
       <ParticleSystemEnhanced
-        config={fireEffect}
+        config={createFireTextureEffect([texture])}
         play={true}
         position={[400, 300]}
         scale={1.0}
-        onComplete={() => console.log('🔥 火焰效果完成')}
       />
-    </Stage>
+    </Application>
   );
 }
 ```
@@ -152,11 +166,10 @@ const config = {
 
 | 名称 | 描述 |
 |------|------|
+| `fireEffect`  | 火焰特效
 | `waterEffect` | 水涌动特效 |
 | `explosionEffect` | 爆炸特效 |
 | `magicEffect` | 魔法闪烁 |
-| `createTextureEffect(texture)` | 纹理粒子效果 |
-
 ---
 
 ## 🎮 实时控制（ParticleDemo 内置）
@@ -175,20 +188,38 @@ const config = {
 
 增强版粒子系统使用对象池技术：
 
-- 对已销毁的粒子复用对象；
+- 对已销毁的粒子复用对象
 - 降低垃圾回收频率；
-- 适合大量粒子（1000+）实时渲染。
+- 使用链表而非数组管理粒子
+- 行为优先级排序，优化更新流程
+---
+
+## 纹理加载
+新版本支持异步加载纹理并应用到粒子系统：
 
 ```ts
-this.particlePool = new ObjectPool<EnhancedParticle>(
-  () => new EnhancedParticle(),
-  (particle) => particle.reset(),
-  50, 
-  config.maxParticles * 2
-);
+// 在 ParticleDemo 中的纹理加载示例
+useEffect(() => {
+  const loadTextures = async () => {
+    try {
+      // 使用 Assets.load 异步加载纹理
+      const [particle, fire] = await Promise.all([
+        Assets.load('assets/particle.png'),
+        Assets.load('assets/Fire.png'),
+      ]);
+      
+      setParticleTexture(particle);
+      setFireTexture(fire);
+      setTexturesLoaded(true);
+    } catch (error) {
+      console.error('纹理加载失败:', error);
+    }
+  };
+  
+  loadTextures();
+}, []);
 ```
 
----
 
 ## 🧾 提示与调试建议
 
