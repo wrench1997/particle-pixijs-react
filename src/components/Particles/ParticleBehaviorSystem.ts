@@ -19,14 +19,15 @@ export enum BehaviorPriority {
 
 
 
-// 行为接口
 export interface IBehavior {
   type: string;
-  order: number; // 优先级，数字越小越先执行
+  order: number; 
   init(particle: any, config: any): void;
   update(particle: any, deltaTime: number, progress: number): void;
+  
+  // 添加批量初始化方法
+  initParticles?(first: any): void;
 }
-
 
 
 // 行为注册系统

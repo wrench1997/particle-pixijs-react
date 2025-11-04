@@ -132,7 +132,8 @@ export const fireEffect: ParticleConfig = {
           x: 0,
           y: 0,
           radius: 10,
-          innerRadius: 0
+          innerRadius: 0,
+          affectRotation: false
         }
       }
     }
@@ -145,7 +146,7 @@ export const createFireTextureEffect = (texture: PIXI.Texture): ParticleConfig =
   
   // 添加纹理行为
   baseConfig.behaviors.push({
-    type: 'textureSingle',
+    type: 'textureRandom',
     config: {
       texture: texture
     }

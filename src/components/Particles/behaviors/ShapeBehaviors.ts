@@ -122,6 +122,28 @@ export class PolygonalChain {
   }
 }
 
+
+
+// getRandPos(particle) {
+//   // place the particle at a random radius in the ring
+//   if (this.innerRadius !== this.radius) {
+//       particle.x = (Math.random() * (this.radius - this.innerRadius)) + this.innerRadius;
+//   }
+//   else {
+//       particle.x = this.radius;
+//   }
+//   particle.y = 0;
+//   // rotate the point to a random angle in the circle
+//   const angle = Math.random() * Math.PI * 2;
+//   if (this.rotation) {
+//       particle.rotation += angle;
+//   }
+//   rotatePoint(angle, particle.position);
+//   // now add in the center of the torus
+//   particle.position.x += this.x;
+//   particle.position.y += this.y;
+// }
+
 // 基础形状生成行为
 export class SpawnShapeBehavior implements IBehavior {
   type = 'spawnShape';
@@ -132,6 +154,39 @@ export class SpawnShapeBehavior implements IBehavior {
     
     switch (config.type) {
       case 'torus':
+        if (config.data && config.data.radius !== undefined) {
+          const radius = config.data.radius;
+          const innerRadius = config.data.innerRadius || 0;
+          const x = config.data.x || 0;
+          const y = config.data.y || 0;
+          const angle = Math.random() * Math.PI * 2;
+          
+          // 设置粒子在环形上的随机位置
+          if (innerRadius !== radius) {
+            particle.x = (Math.random() * (radius - innerRadius)) + innerRadius;
+          } else {
+            particle.x = radius;
+          }
+          particle.y = 0;
+
+          
+          // 如果需要影响旋转，则设置粒子旋转
+          if (config.data.affectRotation) {
+            particle.rotation += angle;
+          }
+          
+          // 旋转粒子位置
+          rotatePoint(angle, particle);
+          
+          // 添加中心点偏移
+          particle.x += x;
+          particle.y += y;
+          const speed = particle.speedList.length > 0 ? particle.speedList[0].value : 100;
+          particle.velocity.x = speed;
+          particle.velocity.y = speed;
+
+        }
+        break;
       case 'circle':
         if (config.data && config.data.radius !== undefined) {
           const radius = config.data.radius;
