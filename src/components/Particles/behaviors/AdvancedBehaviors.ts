@@ -1,10 +1,12 @@
 // src/components/Particles/behaviors/AdvancedBehaviors.ts
 import type { IBehavior } from '../ParticleBehaviorSystem';
 import * as PIXI from 'pixi.js';
+import { BehaviorPriority } from '../ParticleBehaviorSystem';
 
 // 路径跟随行为
 export class PathFollowBehavior implements IBehavior {
   type = 'pathFollow';
+  order = BehaviorPriority.TRANSFORM + 5; // 优先级 15
   private pathFn: Function | null = null;
 
   init(particle: any, config: any): void {
@@ -97,7 +99,8 @@ export class PathFollowBehavior implements IBehavior {
 // 动画帧行为
 export class AnimatedTextureBehavior implements IBehavior {
   type = 'animatedTexture';
-
+  order = BehaviorPriority.APPEARANCE + 4; // 优先级 34
+  
   init(particle: any, config: any): void {
     if (config.textures && Array.isArray(config.textures)) {
       particle.textureFrames = config.textures;
@@ -135,33 +138,4 @@ export class AnimatedTextureBehavior implements IBehavior {
   }
 }
 
-// 重力行为
-export class GravityBehavior implements IBehavior {
-  type = 'gravity';
 
-  init(particle: any, config: any): void {
-    particle.gravity = {
-      x: config.x || 0,
-      y: config.y || 98
-    };
-  }
-
-  update(particle: any, deltaTime: number, progress: number): void {
-    particle.velocity.x += particle.gravity.x * deltaTime;
-    particle.velocity.y += particle.gravity.y * deltaTime;
-  }
-}
-
-// 阻力行为
-export class DragBehavior implements IBehavior {
-  type = 'drag';
-
-  init(particle: any, config: any): void {
-    particle.drag = config.factor || 0.95;
-  }
-
-  update(particle: any, deltaTime: number, progress: number): void {
-    particle.velocity.x *= Math.pow(particle.drag, deltaTime * 10);
-    particle.velocity.y *= Math.pow(particle.drag, deltaTime * 10);
-  }
-}

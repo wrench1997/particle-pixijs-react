@@ -1,10 +1,13 @@
+
 // src/components/Particles/ParticleDemo.tsx
 import { useState, useCallback, useEffect } from 'react';
 import { Container, Graphics, Text, Texture, Assets } from 'pixi.js';
 import { extend } from '@pixi/react';
 // 导入增强版粒子系统
-import { ParticleSystemEnhanced } from './ParticleSystemEnhanced';
-import { fireEffect, waterEffect, explosionEffect, magicEffect, createTextureEffect } from './ParticlePresets';
+import { ParticleSystemEnhanced, type ParticleConfig } from './ParticleSystemEnhanced';
+import { 
+  fireEffect,createFireTextureEffect, waterEffect, explosionEffect, magicEffect, 
+} from './ParticlePresets';
 
 // 注册组件
 extend({
@@ -13,46 +16,86 @@ extend({
   Text
 });
 
+// 在 ParticleDemo.tsx 中添加对多发射器的支持
+
+// 修改 ParticleSystemEnhanced 组件以支持多配置
+interface MultiEmitterProps {
+  configs: ParticleConfig[];
+  play?: boolean;
+  position?: [number, number];
+  scale?: number;
+  onComplete?: () => void;
+}
+
+export const MultiEmitterSystem = ({ 
+  configs, 
+  play = true, 
+  position = [0, 0], 
+  scale = 1,
+  onComplete 
+}: MultiEmitterProps) => {
+  return (
+    <pixiContainer
+      position={{x: position[0], y: position[1]}}
+      scale={{x: scale, y: scale}}
+    >
+      {configs.map((config, index) => (
+        <ParticleSystemEnhanced
+          key={index}
+          config={config}
+          play={play}
+          position={[0, 0]} // 相对于父容器的位置
+          scale={1} // 相对于父容器的缩放
+          onComplete={index === 0 ? onComplete : undefined} // 只在第一个发射器完成时触发
+        />
+      ))}
+    </pixiContainer>
+  );
+};
+
 export const ParticleDemo = () => {
   const [selectedEffect, setSelectedEffect] = useState('fire');
   const [play, setPlay] = useState(true);
   const [scale, setScale] = useState(1);
-  const [textureLoaded, setTextureLoaded] = useState(false);
-  const [textureInstance, setTextureInstance] = useState<Texture | null>(null);
-  
+  const [texturesLoaded, setTexturesLoaded] = useState(false);
+  const [particleTexture, setParticleTexture] = useState<Texture | null>(null);
+  const [fireTexture, setFireTexture] = useState<Texture | null>(null);
+
   // 预加载纹理
   useEffect(() => {
-    const loadTexture = async () => {
+    const loadTextures = async () => {
       try {
         // 使用 Assets.load 异步加载纹理
-        const texture = await Assets.load('assets/Bubbles99.png');
-        setTextureInstance(texture);
-        setTextureLoaded(true);
+        const [particle, fire] = await Promise.all([
+          Assets.load('assets/particle.png'),
+          Assets.load('assets/Fire.png'),
+        ]);
+        
+        setParticleTexture(particle);
+        setFireTexture(fire);
+        setTexturesLoaded(true);
       } catch (error) {
         console.error('纹理加载失败:', error);
       }
     };
     
-    loadTexture();
+    loadTextures();
   }, []);
+  
   
   // 获取当前选择的效果配置
   const getSelectedConfig = useCallback(() => {
     switch (selectedEffect) {
-      case 'fire': return fireEffect;
-      case 'water': return waterEffect;
-      case 'explosion': return explosionEffect;
-      case 'magic': return magicEffect;
-      case 'texture': 
-        // 只有在纹理加载完成后才返回纹理效果
-        if (textureLoaded && textureInstance) {
-          return createTextureEffect(textureInstance);
-        }
-        // 如果纹理未加载完成，返回一个默认效果
-        return magicEffect;
-      default: return fireEffect;
+      case 'fire': 
+        return fireTexture ? 
+          [createFireTextureEffect(fireTexture)] : 
+          [fireEffect];
+      case 'water': return [waterEffect];
+      case 'explosion': return [explosionEffect];
+      case 'magic': return [magicEffect];
+      default: return [magicEffect];
     }
-  }, [selectedEffect, textureLoaded, textureInstance]);
+  }, [selectedEffect, texturesLoaded, particleTexture, fireTexture]);
   
   // 绘制按钮
   const drawButton = useCallback((g: Graphics, isSelected: boolean) => {
@@ -93,14 +136,24 @@ export const ParticleDemo = () => {
   
   return (
     <pixiContainer>
-      {/* 使用增强版粒子系统 */}
-      <ParticleSystemEnhanced
-        config={getSelectedConfig()}
-        play={play}
-        position={[400, 300]}
-        scale={scale}
-        onComplete={() => console.log('粒子效果完成')}
-      />
+      {/* 使用多发射器系统 */}
+      {Array.isArray(getSelectedConfig()[0]) ? (
+        <MultiEmitterSystem
+          configs={getSelectedConfig()}
+          play={play}
+          position={[400, 300]}
+          scale={scale}
+          onComplete={() => console.log('粒子效果完成')}
+        />
+      ) : (
+        <ParticleSystemEnhanced
+          config={getSelectedConfig()[0]}
+          play={play}
+          position={[400, 300]}
+          scale={scale}
+          onComplete={() => console.log('粒子效果完成')}
+        />
+      )}
       
       {/* 控制面板 */}
       <pixiContainer position={{x: 100, y: 500}}>
@@ -111,7 +164,7 @@ export const ParticleDemo = () => {
         interactive={true}
         cursor="pointer"
         position={{x: 20, y: 20}}>
-          {['fire', 'water', 'explosion', 'magic', 'texture'].map((effect, index) => (
+          {['fire', 'water', 'explosion', 'magic',].map((effect, index) => (
             <pixiContainer
               key={effect}
               position={{x: index * 130, y: 0}}

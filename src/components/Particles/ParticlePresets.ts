@@ -3,17 +3,25 @@
 import type { ParticleConfig } from './ParticleSystem';
 import * as PIXI from 'pixi.js';
 
+
+
+
+
+
+
+// src/components/Particles/ParticlePresets.ts 中添加火焰效果配置
+
 // 火焰效果
 export const fireEffect: ParticleConfig = {
   lifetime: {
-    min: 0.5,
-    max: 0.5
+    min: 0.1,
+    max: 0.75
   },
-  frequency: 0.008,
+  frequency: 0.001,
   spawnChance: 1,
-  particlesPerWave: 1,
+  particlesPerWave: 3,
   emitterLifetime: 0, // 无限
-  maxParticles: 300,
+  maxParticles: 1000,
   pos: {
     x: 0,
     y: 0
@@ -26,45 +34,71 @@ export const fireEffect: ParticleConfig = {
         alpha: {
           list: [
             {
-              value: 0.8,
+              value: 0.62,
               time: 0
             },
             {
-              value: 0.1,
+              value: 0.5,
+              time: 0.5
+            },
+            {
+              value: 0,
               time: 1
             }
           ],
         },
       }
     },
+
+    {
+      type: 'rotation',
+      config: {
+        accel: 0,
+        minSpeed: 50,
+        maxSpeed: 50,
+        minStart: 265,
+        maxStart: 275
+      }
+    },
+    
+    {
+      type: "moveSpeedStatic",
+      config: {
+        min: 500,
+        max: 500
+      }
+    },
+
     {
       type: 'scale',
       config: {
         scale: {
           list: [
             {
-              value: 1,
+              value: 0.25,
               time: 0
             },
             {
-              value: 0.3,
+              value: 0.75,
               time: 1
             }
           ],
         },
+        minMult: 1
       }
     },
+
     {
       type: 'color',
       config: {
         color: {
           list: [
             {
-              value: "fb1010",
+              value: "fff191",
               time: 0
             },
             {
-              value: "f5b830",
+              value: "ff622c",
               time: 1
             }
           ],
@@ -87,13 +121,7 @@ export const fireEffect: ParticleConfig = {
           ],
           isStepped: false
         },
-      }
-    },
-    {
-      type: 'rotationStatic',
-      config: {
-        min: 0,
-        max: 360
+        minMult: 0.8
       }
     },
     {
@@ -103,12 +131,30 @@ export const fireEffect: ParticleConfig = {
         data: {
           x: 0,
           y: 0,
-          radius: 10
+          radius: 10,
+          innerRadius: 0
         }
       }
     }
   ]
 };
+
+// 创建带纹理的火焰效果
+export const createFireTextureEffect = (texture: PIXI.Texture): ParticleConfig => {
+  const baseConfig = {...fireEffect};
+  
+  // 添加纹理行为
+  baseConfig.behaviors.push({
+    type: 'textureSingle',
+    config: {
+      texture: texture
+    }
+  });
+  
+  return baseConfig;
+};
+
+
 
 // 水效果
 export const waterEffect: ParticleConfig = {
@@ -548,3 +594,13 @@ export const createTextureEffect = (texture: PIXI.Texture): ParticleConfig => {
     ]
   };
 };
+
+
+
+
+
+
+
+
+
+

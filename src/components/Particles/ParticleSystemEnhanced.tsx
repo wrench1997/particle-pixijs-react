@@ -5,20 +5,31 @@ import { extend, useTick } from '@pixi/react';
 import * as PIXI from 'pixi.js';
 import  { behaviorRegistry, ObjectPool, type IBehavior } from './ParticleBehaviorSystem';
 
-// 导入所有行为
+
 import { 
   AlphaBehavior, ScaleBehavior, ColorBehavior, 
-  MoveSpeedBehavior, RotationStaticBehavior, RotationBehavior,
+   RotationStaticBehavior,
   TextureBehavior 
 } from './behaviors/BaseBehaviors';
 
 import {
   PathFollowBehavior, AnimatedTextureBehavior,
-  GravityBehavior, DragBehavior
 } from './behaviors/AdvancedBehaviors';
 
 // 导入形状行为
 import { SpawnShapeBehavior, PolygonShapeBehavior, ImageShapeBehavior } from './behaviors/ShapeBehaviors';
+
+// 导入其他行为，并使用别名避免冲突
+import { TextureRandomBehavior } from './behaviors/TextureBehaviors';
+import { RotationBehavior } from './behaviors/RotationBehaviors';
+import {
+  MoveSpeedStaticBehavior,
+  MoveSpeedBehavior,
+  AccelerationBehavior,
+  DragBehavior,
+  GravityBehavior
+} from './behaviors/SpeedBehaviors';
+
 
 
 // 注册组件
@@ -36,7 +47,6 @@ function registerBehaviors() {
   behaviorRegistry.register('color', ColorBehavior);
   behaviorRegistry.register('moveSpeed', MoveSpeedBehavior);
   behaviorRegistry.register('rotationStatic', RotationStaticBehavior);
-  behaviorRegistry.register('rotation', RotationBehavior);
   behaviorRegistry.register('textureSingle', TextureBehavior);
   
   // 高级行为
@@ -47,6 +57,17 @@ function registerBehaviors() {
   
   // 形状行为
   behaviorRegistry.register('spawnShape', SpawnShapeBehavior);
+  behaviorRegistry.register('polygonalChain', PolygonShapeBehavior);
+  behaviorRegistry.register('imageShape', ImageShapeBehavior);
+  // 速度行为
+  behaviorRegistry.register('moveSpeedStatic', MoveSpeedStaticBehavior);
+  behaviorRegistry.register('moveAcceleration', AccelerationBehavior);
+  
+  // 纹理行为
+  behaviorRegistry.register('textureRandom', TextureRandomBehavior);
+  
+  // 使用从 RotationBehaviors.ts 导入的 RotationBehavior
+  behaviorRegistry.register('rotation', RotationBehavior);
 }
 
 // 确保行为只注册一次
@@ -516,6 +537,9 @@ class EnhancedParticleEmitter {
         particle.behaviors.push(behavior);
       }
     }
+    
+    // 根据优先级排序行为
+    particle.behaviors.sort((a, b) => a.order - b.order);
     
     // 设置生命周期
     particle.lifetime = this.config.lifetime.min + Math.random() * (this.config.lifetime.max - this.config.lifetime.min);

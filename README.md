@@ -152,7 +152,6 @@ const config = {
 
 | 名称 | 描述 |
 |------|------|
-| `fireEffect` | 火焰特效 |
 | `waterEffect` | 水涌动特效 |
 | `explosionEffect` | 爆炸特效 |
 | `magicEffect` | 魔法闪烁 |

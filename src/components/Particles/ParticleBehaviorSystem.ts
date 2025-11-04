@@ -1,11 +1,33 @@
 // src/components/Particles/ParticleBehaviorSystem.ts
 
+export enum BehaviorPriority {
+  // 生成行为（如形状生成）：优先级 0-9
+  SPAWN = 0,
+  
+  // 变换行为（如旋转、缩放）：优先级 10-19
+  TRANSFORM = 10,
+  
+  // 移动行为（如速度、加速度）：优先级 20-29
+  MOVEMENT = 20,
+  
+  // 外观行为（如颜色、透明度）：优先级 30-39
+  APPEARANCE = 30,
+  
+  // 特殊行为（如碰撞、生命周期）：优先级 40-49
+  SPECIAL = 40
+}
+
+
+
 // 行为接口
 export interface IBehavior {
   type: string;
+  order: number; // 优先级，数字越小越先执行
   init(particle: any, config: any): void;
   update(particle: any, deltaTime: number, progress: number): void;
 }
+
+
 
 // 行为注册系统
 class BehaviorRegistry {
