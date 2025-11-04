@@ -88,14 +88,14 @@ export default function TexturedParticles() {
 该组件带有完整控制面板，可实时切换粒子效果、播放状态和缩放。
 
 ```tsx
-import { Stage } from '@pixi/react';
+import { Application } from '@pixi/react';
 import { ParticleDemo } from './components/Particles/ParticleDemo';
 
 export default function Demo() {
   return (
-    <Stage width={800} height={600} options={{ background: 0x000000 }}>
+    <Application width={800} height={600} options={{ background: 0x000000 }}>
       <ParticleDemo />
-    </Stage>
+    </Application>
   );
 }
 ```
