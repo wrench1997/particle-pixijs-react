@@ -272,8 +272,8 @@ export const explosionEffect: ParticleConfig = {
   },
   frequency: 0.001,
   spawnChance: 1,
-  particlesPerWave: 20,
-  emitterLifetime: 0.1, // 短暂爆发
+  particlesPerWave: 30,
+  emitterLifetime: 0, // 短暂爆发
   maxParticles: 100,
   pos: {
     x: 0,
