@@ -87,8 +87,8 @@ export const ParticleDemo = () => {
   const getSelectedConfig = useCallback(() => {
     switch (selectedEffect) {
       case 'fire': 
-        return fireTexture ? 
-          [createFireTextureEffect(fireTexture)] : 
+        return fireTexture && particleTexture  ? 
+          [createFireTextureEffect([particleTexture, fireTexture])] : 
           [fireEffect];
       case 'water': return [waterEffect];
       case 'explosion': return [explosionEffect];

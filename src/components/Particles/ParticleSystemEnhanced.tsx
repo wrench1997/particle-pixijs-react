@@ -1,9 +1,11 @@
+
 // src/components/Particles/ParticleSystemEnhanced.tsx
 import { useRef, useEffect } from 'react';
 import { Container, Graphics, Sprite } from 'pixi.js';
 import { extend, useTick } from '@pixi/react';
 import * as PIXI from 'pixi.js';
-import  { behaviorRegistry, ObjectPool, type IBehavior } from './ParticleBehaviorSystem';
+import { behaviorRegistry, ObjectPool, type IBehavior } from './ParticleBehaviorSystem';
+import { rotatePoint, normalize, scaleBy, length } from './ParticleUtils';
 
 
 import { 
@@ -124,6 +126,7 @@ class EnhancedParticle {
   acceleration: { x: number; y: number };
   lifetime: number;
   age: number;
+  agePercent: number;
   color: number;
   colorList: { value: string; time: number }[];
   scaleList: { value: number; time: number }[];
@@ -131,6 +134,13 @@ class EnhancedParticle {
   speedList: { value: number; time: number }[];
   texture: PIXI.Texture | null;
   behaviors: IBehavior[];
+  
+  // 链表支持
+  next: EnhancedParticle | null = null;
+  prev: EnhancedParticle | null = null;
+  
+  // 额外属性
+  config: any = {};
   
   // 额外属性，用于支持高级行为
   rotationSpeed: number;
@@ -159,6 +169,7 @@ class EnhancedParticle {
     this.acceleration = { x: 0, y: 0 };
     this.lifetime = 1;
     this.age = 0;
+    this.agePercent = 0;
     this.color = 0xffffff;
     this.colorList = [];
     this.scaleList = [];
@@ -194,6 +205,7 @@ class EnhancedParticle {
     this.acceleration = { x: 0, y: 0 };
     this.lifetime = 1;
     this.age = 0;
+    this.agePercent = 0;
     this.color = 0xffffff;
     this.colorList = [];
     this.scaleList = [];
@@ -201,6 +213,9 @@ class EnhancedParticle {
     this.speedList = [];
     this.texture = null;
     this.behaviors = [];
+    this.next = null;
+    this.prev = null;
+    this.config = {};
     
     // 重置高级行为属性
     this.rotationSpeed = 0;
@@ -236,7 +251,8 @@ class EnhancedParticle {
     }
 
     // 计算当前生命周期进度 (0-1)
-    const progress = this.age / this.lifetime;
+    this.agePercent = this.age / this.lifetime;
+    const progress = this.agePercent;
     
     // 更新颜色
     if (this.colorList.length > 0) {
@@ -402,15 +418,28 @@ class EnhancedParticle {
 
 // 增强的粒子发射器类
 class EnhancedParticleEmitter {
-  particles: EnhancedParticle[];
+  // 链表管理
+  _activeParticlesFirst: EnhancedParticle | null = null;
+  _activeParticlesLast: EnhancedParticle | null = null;
+  _poolFirst: EnhancedParticle | null = null;
+  
+  // 位置插值
+  _prevEmitterPos: PIXI.Point = new PIXI.Point();
+  _prevPosIsValid: boolean = false;
+  _posChanged: boolean = false;
+  
+  // 其他属性
+  particles: EnhancedParticle[] = [];
   config: ParticleConfig;
   container: PIXI.Container;
-  elapsed: number;
-  emitterAge: number;
-  nextSpawnTime: number;
-  active: boolean;
+  elapsed: number = 0;
+  emitterAge: number = 0;
+  nextSpawnTime: number = 0;
+  active: boolean = true;
   particlePool: ObjectPool<EnhancedParticle>;
-  behaviorInstances: Map<string, IBehavior>;
+  behaviorInstances: Map<string, IBehavior> = new Map();
+  particleCount: number = 0;
+  customEase: Function | null = null;
 
   constructor(container: PIXI.Container, config: ParticleConfig) {
     this.particles = [];
@@ -431,6 +460,10 @@ class EnhancedParticleEmitter {
     
     // 创建行为实例缓存
     this.behaviorInstances = new Map();
+    
+    // 初始化位置
+    this._prevEmitterPos.x = config.pos.x;
+    this._prevEmitterPos.y = config.pos.y;
   }
 
   // 更新发射器
@@ -457,19 +490,27 @@ class EnhancedParticleEmitter {
       }
     }
     
-    // 更新现有粒子
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const particle = this.particles[i];
+    // 更新现有粒子 - 使用链表遍历
+    let particle = this._activeParticlesFirst;
+    while (particle) {
+      const nextParticle = particle.next; // 保存下一个粒子引用
+      
       const alive = particle.update(deltaTime);
       
       if (!alive) {
-        // 移除死亡粒子
-        this.container.removeChild(particle.graphic);
-        this.particles.splice(i, 1);
-        
-        // 将粒子返回对象池
-        this.particlePool.release(particle);
+        // 回收死亡粒子
+        this.recycle(particle);
       }
+      
+      particle = nextParticle;
+    }
+    
+    // 更新位置状态
+    if (this._posChanged) {
+      this._prevEmitterPos.x = this.config.pos.x;
+      this._prevEmitterPos.y = this.config.pos.y;
+      this._prevPosIsValid = true;
+      this._posChanged = false;
     }
     
     return true;
@@ -478,13 +519,13 @@ class EnhancedParticleEmitter {
   // 生成粒子
   spawnParticles() {
     // 检查是否达到最大粒子数
-    if (this.particles.length >= this.config.maxParticles) {
+    if (this.particleCount >= this.config.maxParticles) {
       return;
     }
     
     const count = Math.min(
       this.config.particlesPerWave,
-      this.config.maxParticles - this.particles.length
+      this.config.maxParticles - this.particleCount
     );
     
     for (let i = 0; i < count; i++) {
@@ -508,8 +549,19 @@ class EnhancedParticleEmitter {
       // 更新图形
       particle.updateGraphic();
       
-      // 添加到粒子列表
+      // 添加到链表
+      if (!this._activeParticlesFirst) {
+        this._activeParticlesFirst = particle;
+        this._activeParticlesLast = particle;
+      } else if (this._activeParticlesLast) {
+        this._activeParticlesLast.next = particle;
+        particle.prev = this._activeParticlesLast;
+        this._activeParticlesLast = particle;
+      }
+      
+      // 添加到粒子列表 (保留兼容性)
       this.particles.push(particle);
+      this.particleCount++;
     }
   }
 
@@ -545,6 +597,44 @@ class EnhancedParticleEmitter {
     particle.lifetime = this.config.lifetime.min + Math.random() * (this.config.lifetime.max - this.config.lifetime.min);
   }
 
+  // 回收粒子
+  recycle(particle: EnhancedParticle): void {
+    // 从链表中移除
+    if (particle.prev) {
+      particle.prev.next = particle.next;
+    } else {
+      this._activeParticlesFirst = particle.next;
+    }
+    
+    if (particle.next) {
+      particle.next.prev = particle.prev;
+    } else {
+      this._activeParticlesLast = particle.prev;
+    }
+    
+    // 从容器中移除
+    this.container.removeChild(particle.graphic);
+    
+    // 从数组中移除 (保留兼容性)
+    const index = this.particles.indexOf(particle);
+    if (index !== -1) {
+      this.particles.splice(index, 1);
+    }
+    
+    // 减少计数
+    this.particleCount--;
+    
+    // 返回到对象池
+    this.particlePool.release(particle);
+  }
+
+  // 更新位置
+  updatePosition(x: number, y: number): void {
+    this._posChanged = true;
+    this.config.pos.x = x;
+    this.config.pos.y = y;
+  }
+
   // 停止发射器
   stop() {
     this.active = false;
@@ -559,11 +649,21 @@ class EnhancedParticleEmitter {
   // 销毁发射器
   destroy() {
     // 移除所有粒子
-    for (const particle of this.particles) {
+    let particle = this._activeParticlesFirst;
+    while (particle) {
+      const nextParticle = particle.next;
       this.container.removeChild(particle.graphic);
       this.particlePool.release(particle);
+      particle = nextParticle;
     }
+    
+    // 重置链表
+    this._activeParticlesFirst = null;
+    this._activeParticlesLast = null;
+    
+    // 清空数组 (保留兼容性)
     this.particles = [];
+    this.particleCount = 0;
     this.active = false;
     
     // 清空对象池

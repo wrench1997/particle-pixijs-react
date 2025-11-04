@@ -17,9 +17,9 @@ export const fireEffect: ParticleConfig = {
     min: 0.1,
     max: 0.75
   },
-  frequency: 0.001,
+  frequency: 0.005,
   spawnChance: 1,
-  particlesPerWave: 3,
+  particlesPerWave: 50,
   emitterLifetime: 0, // 无限
   maxParticles: 1000,
   pos: {
@@ -141,14 +141,14 @@ export const fireEffect: ParticleConfig = {
 };
 
 // 创建带纹理的火焰效果
-export const createFireTextureEffect = (texture: PIXI.Texture): ParticleConfig => {
+export const createFireTextureEffect = (textures: PIXI.Texture | PIXI.Texture[]): ParticleConfig => {
   const baseConfig = {...fireEffect};
   
   // 添加纹理行为
   baseConfig.behaviors.push({
     type: 'textureRandom',
     config: {
-      texture: texture
+      textures: Array.isArray(textures) ? textures : [textures]
     }
   });
   
