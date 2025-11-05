@@ -10,6 +10,7 @@ import { BehaviorPriority } from '../ParticleBehaviorSystem';
 // 动态旋转行为
 export class RotationBehavior implements IBehavior {
   type = 'rotation';
+  updateGlobal: any;
   order = BehaviorPriority.TRANSFORM; // 优先级 10
   
 

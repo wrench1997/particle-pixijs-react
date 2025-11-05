@@ -7,8 +7,14 @@ import { BehaviorPriority } from '../ParticleBehaviorSystem';
 
 // Alpha行为
 export class AlphaBehavior implements IBehavior {
+  cleanup: any;
+  updateGlobal: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'alpha';
   order = BehaviorPriority.APPEARANCE; // 优先级 30
+  
   
   init(particle: any, config: any): void {
     if (config.alpha && config.alpha.list) {
@@ -23,6 +29,11 @@ export class AlphaBehavior implements IBehavior {
 
 // 缩放行为
 export class ScaleBehavior implements IBehavior {
+  cleanup: any;
+  updateGlobal: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'scale';
   order = BehaviorPriority.TRANSFORM + 1; // 优先级 11
   
@@ -39,6 +50,11 @@ export class ScaleBehavior implements IBehavior {
 
 // 颜色行为
 export class ColorBehavior implements IBehavior {
+  cleanup: any;
+  updateGlobal: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'color';
   order = BehaviorPriority.APPEARANCE + 1; // 优先级 31
   
@@ -56,6 +72,11 @@ export class ColorBehavior implements IBehavior {
 
 // 静态旋转行为
 export class RotationStaticBehavior implements IBehavior {
+  cleanup: any;
+  updateGlobal: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'rotationStatic';
   order = BehaviorPriority.TRANSFORM + 2; // 优先级 12
   
@@ -72,6 +93,11 @@ export class RotationStaticBehavior implements IBehavior {
 
 // 纹理行为
 export class TextureBehavior implements IBehavior {
+  cleanup: any;
+  updateGlobal: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'textureSingle';
   order = BehaviorPriority.APPEARANCE + 3; // 优先级 33
   

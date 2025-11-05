@@ -27,7 +27,7 @@ import { BehaviorPriority } from '../ParticleBehaviorSystem';
 export class MoveSpeedStaticBehavior implements IBehavior {
     type = 'moveSpeedStatic';
     order = BehaviorPriority.MOVEMENT; // 优先级 20
-  
+    updateGlobal: any;
 
     private min: number = 0;
     private max: number = 0;
@@ -35,6 +35,10 @@ export class MoveSpeedStaticBehavior implements IBehavior {
     constructor() {
       // 空构造函数，符合 new () => IBehavior 要求
     }
+  cleanup: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   
     init(particle: any, config: any): void {
       // 在init方法中处理配置
@@ -87,6 +91,7 @@ export class MoveSpeedStaticBehavior implements IBehavior {
  */
 export class MoveSpeedBehavior implements IBehavior {
   type = 'moveSpeed';
+  updateGlobal: any;
   order = BehaviorPriority.MOVEMENT + 1; // 优先级 21
   
 
@@ -96,6 +101,10 @@ export class MoveSpeedBehavior implements IBehavior {
 
   constructor() {
     // 空构造函数，符合 new () => IBehavior 要求
+  }
+  cleanup: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
   }
 
   init(particle: any, config: any): void {
@@ -213,6 +222,7 @@ export class MoveSpeedBehavior implements IBehavior {
  */
 export class AccelerationBehavior implements IBehavior {
     type = 'moveAcceleration';
+    updateGlobal: any;
     order = BehaviorPriority.MOVEMENT + 2; // 优先级 22
   
     private minStart: number = 0;
@@ -224,6 +234,10 @@ export class AccelerationBehavior implements IBehavior {
     constructor() {
       // 空构造函数，符合 new () => IBehavior 要求
     }
+  cleanup: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   
     init(particle: any, config: any): void {
       // 在init方法中处理配置
@@ -282,11 +296,15 @@ export class AccelerationBehavior implements IBehavior {
 export class DragBehavior implements IBehavior {
   type = 'drag';
   order = BehaviorPriority.MOVEMENT + 4; // 优先级 24
-  
+  updateGlobal: any;
   private factor: number = 0.95;
 
   constructor() {
     // 空构造函数，符合 new () => IBehavior 要求
+  }
+  cleanup: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
   }
 
   init(particle: any, config: any): void {
@@ -320,11 +338,15 @@ export class DragBehavior implements IBehavior {
 export class GravityBehavior implements IBehavior {
   type = 'gravity';
   order = BehaviorPriority.MOVEMENT + 5; // 优先级 25
-  
+  updateGlobal: any;
   private gravity: PIXI.Point = new PIXI.Point(0, 98);
 
   constructor() {
     // 空构造函数，符合 new () => IBehavior 要求
+  }
+  cleanup: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
   }
 
   init(particle: any, config: any): void {

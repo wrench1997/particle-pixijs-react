@@ -32,7 +32,7 @@ import {
   GravityBehavior
 } from './behaviors/SpeedBehaviors';
 
-import { ArrowRotationBehavior } from './behaviors/ArrowRotationBehavior';
+import { GLSLArrowBehavior } from './behaviors/GLSLArrowBehavior';
 
 
 
@@ -75,7 +75,7 @@ function registerBehaviors() {
   behaviorRegistry.register('rotation', RotationBehavior);
 
   // 注册箭矢旋转行为
-  behaviorRegistry.register('arrowRotation', ArrowRotationBehavior);
+  behaviorRegistry.register('glslArrow', GLSLArrowBehavior);
 }
 
 // 确保行为只注册一次
@@ -87,6 +87,7 @@ if (!behaviorsRegistered) {
 
 // 粒子配置接口
 export interface ParticleConfig {
+  globalBehaviors: boolean;
   lifetime: {
     min: number;
     max: number;
@@ -102,6 +103,8 @@ export interface ParticleConfig {
   };
   addAtBack: boolean;
   behaviors: ParticleBehavior[];
+  globalBehaviors?: ParticleBehavior[]; // 新增：全局行为配置
+
 }
 
 // 粒子行为接口
@@ -424,6 +427,8 @@ class EnhancedParticle {
 
 // 增强的粒子发射器类
 class EnhancedParticleEmitter {
+  globalBehaviors: IBehavior[] = [];
+
   // 链表管理
   _activeParticlesFirst: EnhancedParticle | null = null;
   _activeParticlesLast: EnhancedParticle | null = null;
@@ -471,8 +476,31 @@ class EnhancedParticleEmitter {
     // 初始化位置
     this._prevEmitterPos.x = config.pos.x;
     this._prevEmitterPos.y = config.pos.y;
+    // 初始化全局行为
+    this.initGlobalBehaviors();
+
   }
 
+
+    // 初始化全局行为
+    initGlobalBehaviors(): void {
+      // 检查配置中是否有全局行为
+      if (this.config.globalBehaviors && Array.isArray(this.config.globalBehaviors)) {
+        for (const behaviorConfig of this.config.globalBehaviors) {
+          const behavior = behaviorRegistry.create(behaviorConfig.type);
+          
+          if (behavior) {
+            // 如果行为有 initParticles 方法，调用它
+            if (typeof behavior.initParticles === 'function') {
+              behavior.initParticles(this.container);
+            }
+            
+            this.globalBehaviors.push(behavior);
+          }
+        }
+      }
+    }
+    
   // 更新发射器
   update(deltaTime: number): boolean {
     if (!this.active) return false;
@@ -519,7 +547,12 @@ class EnhancedParticleEmitter {
       this._prevPosIsValid = true;
       this._posChanged = false;
     }
-    
+
+    for (const behavior of this.globalBehaviors) {
+      if (typeof behavior.updateGlobal === 'function') {
+        behavior.updateGlobal(deltaTime);
+      }
+    }
     return true;
   }
 
@@ -675,6 +708,16 @@ class EnhancedParticleEmitter {
     
     // 清空对象池
     this.particlePool.clear();
+
+    // 清理全局行为
+    for (const behavior of this.globalBehaviors) {
+      if (typeof behavior.cleanup === 'function') {
+        behavior.cleanup();
+      }
+    }
+    this.globalBehaviors = [];
+
+
   }
 }
 

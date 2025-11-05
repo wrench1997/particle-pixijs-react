@@ -600,7 +600,112 @@ export const createTextureEffect = (texture: PIXI.Texture): ParticleConfig => {
 
 
 
-
+// 带有 GLSL 箭头的粒子效果
+export const arrowParticleEffect: ParticleConfig = {
+  lifetime: {
+    min: 0.5,
+    max: 0.8
+  },
+  frequency: 0.01,
+  spawnChance: 1,
+  particlesPerWave: 2,
+  emitterLifetime: 0, // 无限
+  maxParticles: 0,
+  pos: {
+    x: 0,
+    y: 0
+  },
+  addAtBack: false,
+  behaviors: [
+    {
+      type: 'alpha',
+      config: {
+        alpha: {
+          list: [
+            {
+              value: 0.7,
+              time: 0
+            },
+            {
+              value: 0,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'scale',
+      config: {
+        scale: {
+          list: [
+            {
+              value: 0.3,
+              time: 0
+            },
+            {
+              value: 0.1,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'color',
+      config: {
+        color: {
+          list: [
+            {
+              value: "ffcc00",
+              time: 0
+            },
+            {
+              value: "ff6600",
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'moveSpeed',
+      config: {
+        speed: {
+          list: [
+            {
+              value: 60,
+              time: 0
+            },
+            {
+              value: 20,
+              time: 1
+            }
+          ],
+          isStepped: false
+        },
+      }
+    },
+    {
+      type: 'spawnShape',
+      config: {
+        type: 'circle',
+        data: {
+          x: 0,
+          y: 0,
+          radius: 100
+        }
+      }
+    }
+  ],
+  // 添加全局 GLSL 箭头行为
+  globalBehaviors: [
+    {
+      type: 'glslArrow',
+      config: {}
+    }
+  ]
+};
 
 
 

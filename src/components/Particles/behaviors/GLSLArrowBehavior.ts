@@ -1,0 +1,302 @@
+// src/components/Particles/behaviors/GLSLArrowBehavior.ts
+import type { IBehavior } from '../ParticleBehaviorSystem';
+import { BehaviorPriority } from '../ParticleBehaviorSystem';
+import { 
+  Mesh, 
+  Geometry, 
+  Shader, 
+  Container 
+} from 'pixi.js';
+
+export class GLSLArrowBehavior implements IBehavior {
+  type = 'glslArrow';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  order = BehaviorPriority.SPECIAL; // 优先级 40
+  
+  private mesh: Mesh | null = null;
+  private container: Container | null = null;
+  private time: number = 0;
+  private active: boolean = false;
+  
+  constructor() {
+    // 空构造函数
+  }
+  
+  init(particle: any, config: any): void {
+    // 这个行为不会应用于单个粒子，而是创建一个全局的箭头渲染器
+    // 初始化将在 initParticles 中完成
+  }
+  
+  // 批量初始化方法，用于设置全局箭头渲染器
+  initParticles(container: Container): void {
+    if (this.active) return; // 避免重复初始化
+    
+    this.container = container;
+    this.time = 0;
+    this.active = true;
+    
+    // 创建全屏四边形几何体
+    const geometry = new Geometry({
+      attributes: {
+        aPosition: [
+          -1, -1,  // 左下
+           1, -1,  // 右下
+           1,  1,  // 右上
+          -1,  1,  // 左上
+        ],
+        aUV: [
+          0, 0,
+          1, 0,
+          1, 1,
+          0, 1
+        ]
+      },
+      indexBuffer: [0, 1, 2, 0, 2, 3]
+    });
+    
+    // 创建着色器
+    const shader = Shader.from({
+      gl: {
+        vertex: this.getVertexShader(),
+        fragment: this.getFragmentShader()
+      },
+      resources: {
+        uniforms: {
+          u_time: { type: 'f32', value: 0.0 },
+          u_resolution: { type: 'vec2<f32>', value: [800, 600] }
+        }
+      }
+    });
+    
+    // 创建网格
+    this.mesh = new Mesh({ geometry, shader });
+    
+    // 添加到容器
+    container.addChild(this.mesh);
+  }
+  
+  update(particle: any, deltaTime: number, progress: number): void {
+    // 这个方法不会用于更新单个粒子
+  }
+  
+  // 全局更新方法，用于更新箭头渲染器
+  updateGlobal(deltaTime: number): void {
+    if (!this.active || !this.mesh) return;
+    
+    // 更新时间
+    this.time += deltaTime;
+    
+    // 更新着色器 uniforms
+    this.mesh.shader.resources.uniforms.uniforms.u_time = this.time;
+    
+    // 如果容器大小改变，更新分辨率
+    if (this.container) {
+      const renderer = this.container.renderer;
+      if (renderer) {
+        this.mesh.shader.resources.uniforms.uniforms.u_resolution = [
+          renderer.width,
+          renderer.height
+        ];
+      }
+    }
+  }
+  
+  // 清理方法
+  cleanup(): void {
+    if (this.mesh && this.container) {
+      this.container.removeChild(this.mesh);
+      this.mesh = null;
+    }
+    this.active = false;
+  }
+  
+  // 顶点着色器代码
+  private getVertexShader(): string {
+    return `
+      precision mediump float;
+      attribute vec2 aPosition;
+      attribute vec2 aUV;
+      varying vec2 vUV;
+      
+      void main() {
+        gl_Position = vec4(aPosition, 0.0, 1.0);
+        vUV = aUV;
+      }
+    `;
+  }
+  
+  // 片段着色器代码
+  private getFragmentShader(): string {
+    return `
+      precision mediump float;
+      
+      uniform vec2 u_resolution;
+      uniform float u_time;
+      
+      // 2D 旋转矩阵函数
+      mat2 rotate2D(float angle) {
+          float c = cos(angle);
+          float s = sin(angle);
+          return mat2(
+              c, -s,
+              s, c
+          );
+      }
+      
+      // 将2D旋转应用到3D向量的XY分量
+      vec3 applyRotation(vec3 p, float angle) {
+          mat2 rot = rotate2D(angle);
+          vec2 rotatedXY = rot * p.xy;
+          return vec3(rotatedXY.x, rotatedXY.y, p.z);
+      }
+      
+      // 计算点到线段的距离
+      float distToLine(vec3 p, vec3 a, vec3 b) {
+          vec3 pa = p - a;
+          vec3 ba = b - a;
+          float t = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+          return length(pa - ba * t);
+      }
+      
+      // 计算点到盒子的距离
+      float distToBox(vec3 p, vec3 center, vec3 size) {
+          vec3 d = abs(p - center) - size * 0.5;
+          return min(max(d.x, max(d.y, d.z)), 0.0) + length(max(d, 0.0));
+      }
+      
+      // 计算点到三角形的距离
+      float distToTriangle(vec3 p, vec3 a, vec3 b, vec3 c) {
+          vec3 ba = b - a;
+          vec3 ca = c - a;
+          vec3 pa = p - a;
+          
+          vec3 normal = normalize(cross(ba, ca));
+          float dist = abs(dot(pa, normal));
+          
+          // 投影到三角形平面
+          vec3 projected = p - normal * dist;
+          
+          // 检查投影点是否在三角形内
+          vec3 n1 = cross(ba, normal);
+          vec3 n2 = cross(ca, normal);
+          vec3 n3 = cross(c - b, normal);
+          
+          if (dot(projected - a, n1) > 0.0 && 
+              dot(projected - a, n2) < 0.0 && 
+              dot(projected - b, n3) > 0.0) {
+              return dist;
+          }
+          
+          // 如果不在三角形内，计算到边的最小距离
+          float d1 = distToLine(p, a, b);
+          float d2 = distToLine(p, a, c);
+          float d3 = distToLine(p, b, c);
+          
+          return min(min(d1, d2), d3);
+      }
+      
+      // 卡通箭矢 SDF
+      float arrowSDF(vec3 p) {
+          // 箭杆
+          vec3 shaftCenter = vec3(0.0, 0.0, -0.15);
+          vec3 shaftSize = vec3(0.05, 0.05, 0.6);
+          float shaft = distToBox(p, shaftCenter, shaftSize);
+          
+          // 箭头
+          vec3 tip = vec3(0.0, 0.0, 0.3);
+          vec3 base1 = vec3(0.1, 0.0, 0.1);
+          vec3 base2 = vec3(-0.1, 0.0, 0.1);
+          vec3 base3 = vec3(0.0, 0.1, 0.1);
+          
+          float head1 = distToTriangle(p, tip, base1, base2);
+          float head2 = distToTriangle(p, tip, base2, base3);
+          float head3 = distToTriangle(p, tip, base3, base1);
+          float head = min(min(head1, head2), head3) - 0.005;
+          
+          // 羽毛部分
+          vec3 feather1Center = vec3(-0.08, 0.0, -0.4);
+          vec3 feather1Size = vec3(0.08, 0.02, 0.15);
+          float feather1 = distToBox(p, feather1Center, feather1Size);
+          
+          vec3 feather2Center = vec3(0.08, 0.0, -0.4);
+          vec3 feather2Size = vec3(0.08, 0.02, 0.15);
+          float feather2 = distToBox(p, feather2Center, feather2Size);
+          
+          // 组合结果
+          float arrowShape = min(min(shaft, head), min(feather1, feather2));
+      
+          return arrowShape - 0.01;
+      }
+      
+      void main() {
+          // 标准化坐标
+          vec2 uv = gl_FragCoord.xy / u_resolution.xy * 2.0 - 1.0;
+          uv.x *= u_resolution.x / u_resolution.y;
+      
+          // 相机设置
+          vec3 ro = vec3(3.0, 1.0, 1.0);
+          vec3 rd = normalize(vec3(-1.0, -0.3, -0.3) + vec3(uv.x, uv.y, 0.0));
+          
+          // 2D旋转动画
+          float angle = u_time * 0.7;
+          
+          // 光线追踪
+          float t = 0.0;
+          float tMax = 5.0;
+          float d = 0.0;
+          vec3 p;
+          
+          for (int i = 0; i < 64; i++) {
+              p = ro + rd * t;
+              vec3 rotatedP = applyRotation(p, angle);
+              d = arrowSDF(rotatedP);
+              
+              if (d < 0.001 || t > tMax) break;
+              t += d;
+          }
+          
+          // 渲染
+          vec3 arrowColor = vec3(0.8, 0.8, 0.8);
+          vec3 outlineColor = vec3(0.0, 0.0, 0.0);
+          vec3 bgColor = vec3(0.5, 0.7, 1.0);
+          
+          vec3 color;
+          if (t < tMax) {
+              // 命中箭矢
+              vec3 rotatedP = applyRotation(p, angle);
+              vec3 normal = normalize(vec3(
+                  arrowSDF(applyRotation(p + vec3(0.001, 0.0, 0.0), angle)) - arrowSDF(applyRotation(p - vec3(0.001, 0.0, 0.0), angle)),
+                  arrowSDF(applyRotation(p + vec3(0.0, 0.001, 0.0), angle)) - arrowSDF(applyRotation(p - vec3(0.0, 0.001, 0.0), angle)),
+                  arrowSDF(applyRotation(p + vec3(0.0, 0.0, 0.001), angle)) - arrowSDF(applyRotation(p - vec3(0.0, 0.0, 0.001), angle))
+              ));
+              
+              vec3 lightDir = normalize(vec3(1.0, 1.0, -1.0));
+              float diff = dot(normal, lightDir);
+              
+              if (diff > 0.8) diff = 1.0;
+              else if (diff > 0.4) diff = 0.7;
+              else if (diff > 0.0) diff = 0.4;
+              else diff = 0.2;
+              
+              color = arrowColor * diff;
+              
+              float edge = 1.0 - pow(abs(dot(normal, -rd)), 1.0);
+              if (edge > 0.7) {
+                  color = mix(color, outlineColor, (edge - 0.7) * 3.0);
+              }
+              
+              vec3 reflectDir = reflect(-lightDir, normal);
+              float spec = pow(max(dot(rd, reflectDir), 0.0), 32.0);
+              if (spec > 0.5) {
+                  color += vec3(1.0) * 0.5;
+              }
+          } else {
+              // 使用透明背景
+              discard;
+          }
+          
+          gl_FragColor = vec4(color, 1.0);
+      }
+    `;
+  }
+}

@@ -25,6 +25,7 @@ export class PolygonalChain {
   segments: Segment[] = [];
   totalLength: number = 0;
   countingLengths: number[] = [];
+  updateGlobal: any;
 
   constructor(data: IPointData[] | IPointData[][]) {
     // 处理空数据情况
@@ -147,6 +148,11 @@ export class PolygonalChain {
 
 // 基础形状生成行为
 export class SpawnShapeBehavior implements IBehavior {
+  cleanup: any;
+  updateGlobal: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'spawnShape';
   order = BehaviorPriority.SPAWN; // 优先级 0
   
@@ -235,9 +241,13 @@ export class SpawnShapeBehavior implements IBehavior {
 
 // 多边形形状行为
 export class PolygonShapeBehavior implements IBehavior {
+  cleanup: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'polygonalChain';
   order = BehaviorPriority.SPAWN + 1; // 优先级 1
-  
+  updateGlobal: any;
 
   private segments: any[] = [];
   private countingLengths: number[] = [];
@@ -339,9 +349,13 @@ export class PolygonShapeBehavior implements IBehavior {
 
 // 图像形状行为（从图像数据生成粒子）
 export class ImageShapeBehavior implements IBehavior {
+  cleanup: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
   type = 'imageShape';
   order = BehaviorPriority.SPAWN + 2; // 优先级 2
-  
+  updateGlobal: any;
   
   private pixels: {x: number, y: number, color: number}[] = [];
   

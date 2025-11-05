@@ -21,6 +21,8 @@ export enum BehaviorPriority {
 
 
 export interface IBehavior {
+  cleanup: any;
+  updateGlobal: any;
   type: string;
   order: number; 
   init(particle: any, config: any): void;

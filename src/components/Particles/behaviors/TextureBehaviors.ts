@@ -18,13 +18,17 @@ interface RandomTextureBehaviorConfig {
 export class TextureRandomBehavior implements IBehavior {
     type = 'textureRandom';
     order = BehaviorPriority.APPEARANCE + 2; // 优先级 32
-    
+    updateGlobal: any;
     private textures: PIXI.Texture[] = [];
     
     constructor() {
       // 空构造函数，符合 new () => IBehavior 要求
     }
-  
+    cleanup: any;
+    initParticles?(first: any): void {
+      throw new Error('Method not implemented.');
+    }
+    
     init(particle: any, config: any): void {
       // 在init方法中处理纹理列表
       if (config.texture) {
