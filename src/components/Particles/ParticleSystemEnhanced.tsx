@@ -32,6 +32,9 @@ import {
   GravityBehavior
 } from './behaviors/SpeedBehaviors';
 
+import { ArrowRotationBehavior } from './behaviors/ArrowRotationBehavior';
+
+
 
 
 // 注册组件
@@ -70,6 +73,9 @@ function registerBehaviors() {
   
   // 使用从 RotationBehaviors.ts 导入的 RotationBehavior
   behaviorRegistry.register('rotation', RotationBehavior);
+
+  // 注册箭矢旋转行为
+  behaviorRegistry.register('arrowRotation', ArrowRotationBehavior);
 }
 
 // 确保行为只注册一次
