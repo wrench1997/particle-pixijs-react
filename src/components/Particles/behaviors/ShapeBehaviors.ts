@@ -112,8 +112,8 @@ export class PolygonalChain {
     
     // 计算在段内的位置比例
     const segment = this.segments[segmentIndex];
-    let previousCumulative = segmentIndex > 0 ? this.countingLengths[segmentIndex - 1] : 0;
-    let lerp = (rand - previousCumulative) / segment.l;
+    const previousCumulative = segmentIndex > 0 ? this.countingLengths[segmentIndex - 1] : 0;
+    const lerp = (rand - previousCumulative) / segment.l;
     
     // 线性插值计算坐标
     out.x = segment.p1.x + lerp * (segment.p2.x - segment.p1.x);
