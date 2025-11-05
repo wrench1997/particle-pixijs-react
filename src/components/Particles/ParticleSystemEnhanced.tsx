@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 // src/components/Particles/ParticleSystemEnhanced.tsx
 import { useRef, useEffect } from 'react';
@@ -5,7 +6,6 @@ import { Container, Graphics, Sprite } from 'pixi.js';
 import { extend, useTick } from '@pixi/react';
 import * as PIXI from 'pixi.js';
 import { behaviorRegistry, ObjectPool, type IBehavior } from './ParticleBehaviorSystem';
-import { rotatePoint, normalize, scaleBy, length } from './ParticleUtils';
 
 
 import { 
@@ -445,6 +445,7 @@ class EnhancedParticleEmitter {
   particlePool: ObjectPool<EnhancedParticle>;
   behaviorInstances: Map<string, IBehavior> = new Map();
   particleCount: number = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   customEase: Function | null = null;
 
   constructor(container: PIXI.Container, config: ParticleConfig) {

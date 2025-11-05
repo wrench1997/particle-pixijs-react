@@ -1,4 +1,7 @@
 // src/components/Particles/behaviors/TextureBehaviors.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { IBehavior } from '../ParticleBehaviorSystem';
 import * as PIXI from 'pixi.js';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';

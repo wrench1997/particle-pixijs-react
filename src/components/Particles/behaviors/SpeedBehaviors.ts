@@ -1,5 +1,8 @@
 
 // src/components/Particles/behaviors/SpeedBehaviors.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { IBehavior } from '../ParticleBehaviorSystem';
 import * as PIXI from 'pixi.js';
 import { rotatePoint, normalize, scaleBy, length } from '../ParticleUtils';

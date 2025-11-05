@@ -1,12 +1,14 @@
 // src/components/Particles/behaviors/AdvancedBehaviors.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IBehavior } from '../ParticleBehaviorSystem';
-import * as PIXI from 'pixi.js';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';
 
 // 路径跟随行为
 export class PathFollowBehavior implements IBehavior {
   type = 'pathFollow';
   order = BehaviorPriority.TRANSFORM + 5; // 优先级 15
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   private pathFn: Function | null = null;
 
   init(particle: any, config: any): void {

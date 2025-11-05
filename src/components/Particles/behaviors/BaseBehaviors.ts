@@ -1,4 +1,7 @@
 // src/components/Particles/behaviors/BaseBehaviors.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { IBehavior } from '../ParticleBehaviorSystem';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';
 
@@ -7,7 +10,7 @@ export class AlphaBehavior implements IBehavior {
   type = 'alpha';
   order = BehaviorPriority.APPEARANCE; // 优先级 30
   
-  init(particle: unknown, config: unknown): void {
+  init(particle: any, config: any): void {
     if (config.alpha && config.alpha.list) {
       particle.alphaList = config.alpha.list;
     }

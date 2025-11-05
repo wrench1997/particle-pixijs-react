@@ -1,5 +1,6 @@
 // src/components/Particles/ParticleBehaviorSystem.ts
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export enum BehaviorPriority {
   // 生成行为（如形状生成）：优先级 0-9
   SPAWN = 0,

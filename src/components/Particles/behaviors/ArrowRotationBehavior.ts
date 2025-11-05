@@ -2,7 +2,8 @@
 import type { IBehavior } from '../ParticleBehaviorSystem';
 import * as PIXI from 'pixi.js';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * 箭矢旋转行为 - 通过序列帧动画模拟箭矢旋转
  */

@@ -1,6 +1,6 @@
 // src/components/Particles/ParticlePresets.ts
 // src/components/Particles/ParticlePresets.ts
-import type { ParticleConfig } from './ParticleSystem';
+import  { ParticleConfig } from './ParticleSystem';
 import * as PIXI from 'pixi.js';
 
 

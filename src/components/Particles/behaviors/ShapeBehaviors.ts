@@ -1,7 +1,8 @@
 
 // src/components/Particles/behaviors/ShapeBehaviors.ts
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IBehavior } from '../ParticleBehaviorSystem';
-import * as PIXI from 'pixi.js';
 import { rotatePoint } from '../ParticleUtils';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';
 

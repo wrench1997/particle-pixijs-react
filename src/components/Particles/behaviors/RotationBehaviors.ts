@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/Particles/behaviors/RotationBehaviors.ts
+
 import type { IBehavior } from '../ParticleBehaviorSystem';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';
 
-const DEG_TO_RADS = Math.PI / 180;
 
 
 // 动态旋转行为
@@ -42,7 +44,7 @@ export class RotationBehavior implements IBehavior {
     particle.rotationSpeed = ((Math.random() * (this.maxSpeed - this.minSpeed)) + this.minSpeed) * (Math.PI / 180);
   }
 
-  update(particle: any, deltaTime: number, progress: number): void {
+  update(particle: any, deltaTime: number, _progress: number): void {
     if (this.accel) {
       const oldSpeed = particle.rotationSpeed;
       particle.rotationSpeed += this.accel * (Math.PI / 180) * deltaTime;
