@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <title>GLTF → GLSL 转换工具</title>
+    <script type="module">
+      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164/build/three.module.js';
+      import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.164/examples/jsm/loaders/GLTFLoader.js';
+
+      const dropZone = document.getElementById('dropZone');
+      const output = document.getElementById('output');
+
+      //=====================
+      // 文件拖拽处理
+      //=====================
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#00ff99';
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = '#888';
+      });
+
+      dropZone.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#888';
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.gltf') && !file.name.endsWith('.glb')) {
+          alert('请拖入 .gltf 或 .glb 文件');
+          return;
+        }
+
+        output.value = '正在读取模型...\n';
+
+        // 读取文件为 ArrayBuffer
+        const arrayBuffer = await file.arrayBuffer();
+        const loader = new GLTFLoader();
+
+        loader.parse(
+          arrayBuffer,
+          '',
+          (gltf) => {
+            const meshes = [];
+            gltf.scene.traverse((child) => {
+              if (child.isMesh) meshes.push(child);
+            });
+
+            if (meshes.length === 0) {
+              output.value = '❌ 没找到任何 mesh';
+              return;
+            }
+
+            let glslCode = `// 自动生成的 GLSL 模型数据\n// 源文件: ${file.name}\n\n`;
+
+            meshes.forEach((mesh, mIndex) => {
+              const geometry = mesh.geometry;
+              const pos = geometry.attributes.position.array;
+              const normal = geometry.attributes.normal?.array;
+              const uv = geometry.attributes.uv?.array;
+
+              const vCount = pos.length / 3;
+
+              glslCode += `// ========== Mesh ${mIndex} ==========\n`;
+              glslCode += `const int VERT_COUNT_${mIndex} = ${vCount};\n`;
+              glslCode += `const vec3 modelVerts_${mIndex}[VERT_COUNT_${mIndex}] = vec3[](\n`;
+
+              for (let i = 0; i < pos.length; i += 3) {
+                glslCode += `  vec3(${pos[i].toFixed(5)}, ${pos[i + 1].toFixed(5)}, ${pos[i + 2].toFixed(5)}),\n`;
+              }
+              glslCode += `);\n\n`;
+
+              if (normal) {
+                glslCode += `const vec3 modelNormals_${mIndex}[VERT_COUNT_${mIndex}] = vec3[](\n`;
+                for (let i = 0; i < normal.length; i += 3) {
+                  glslCode += `  vec3(${normal[i].toFixed(5)}, ${normal[i + 1].toFixed(5)}, ${normal[i + 2].toFixed(5)}),\n`;
+                }
+                glslCode += `);\n\n`;
+              }
+
+              if (uv) {
+                glslCode += `const vec2 modelUVs_${mIndex}[VERT_COUNT_${mIndex}] = vec2[](\n`;
+                for (let i = 0; i < uv.length; i += 2) {
+                  glslCode += `  vec2(${uv[i].toFixed(5)}, ${uv[i + 1].toFixed(5)}),\n`;
+                }
+                glslCode += `);\n\n`;
+              }
+            });
+
+            output.value = glslCode;
+          },
+          (err) => {
+            console.error(err);
+            output.value = '❌ 解析失败: ' + err.message;
+          }
+        );
+      });
+    </script>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #1e1e1e;
+        color: white;
+        padding: 20px;
+      }
+      #dropZone {
+        border: 2px dashed #888;
+        padding: 40px;
+        text-align: center;
+        border-radius: 10px;
+        background: #2b2b2b;
+        transition: border-color 0.2s;
+      }
+      #output {
+        margin-top: 20px;
+        width: 100%;
+        height: 400px;
+        background: #121212;
+        color: #00ffcc;
+        font-family: monospace;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        resize: vertical;
+      }
+      h1 {
+        text-align: center;
+        color: #00ffaa;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🌐 GLTF → GLSL 转换工具</h1>
+    <div id="dropZone">拖拽 .gltf 或 .glb 模型文件到这里</div>
+    <textarea id="output" readonly placeholder="转换结果会显示在这里..."></textarea>
+  </body>
+</html>
