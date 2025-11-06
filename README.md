@@ -2,31 +2,8 @@
 # 🚀 PixiJS React 粒子系统使用说明
 
 本项目提供了一个基于 **PixiJS + React** 实现的可扩展粒子系统，包括基础版本与增强版本，支持自定义行为、纹理、重力、路径动画、阻力等多种效果。  
-通过预设与自定义配置，你可以快速创建火焰、爆炸、水、魔法等酷炫视觉特效。
+通过预设与自定义配置，你可以快速创建火焰、喷泉、3D箭矢等酷炫视觉特效。
 
----
-
-## 📁 项目结构
-
-```bash
-
-src/
-├── components/
-│   ├── Particles/
-│   │   ├── ParticleDemo.tsx           # 粒子系统演示界面
-│   │   ├── ParticleSystem.tsx         # 基础粒子系统
-│   │   ├── ParticleSystemEnhanced.tsx # 增强版粒子系统
-│   │   ├── ParticlePresets.ts         # 各种粒子效果预设
-│   │   ├── ParticleBehaviorSystem.ts  # 行为注册与对象池
-│   │   └── behaviors/                 # 粒子行为定义模块
-│   │       ├── BaseBehaviors.ts
-│   │       ├── AdvancedBehaviors.ts
-│   │       └── ShapeBehaviors.ts
-└── assets/
-    └── Bubbles99.png                # 粒子纹理资源
-```
-
----
 
 ## 🧩 安装依赖
 
