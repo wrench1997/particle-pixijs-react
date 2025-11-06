@@ -294,13 +294,7 @@ class EnhancedParticle {
       behavior.update(this, deltaTime, progress);
     }
     
-    // 更新位置
-    this.x += this.velocity.x * deltaTime;
-    this.y += this.velocity.y * deltaTime;
-    
-    // 更新速度 (加速度)
-    this.velocity.x += this.acceleration.x * deltaTime;
-    this.velocity.y += this.acceleration.y * deltaTime;
+
     
     // 更新图形
     this.updateGraphic();

@@ -2,19 +2,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export enum BehaviorPriority {
-  // 生成行为（如形状生成）：优先级 0-9
+  // 生成行为（如形状生成）
   SPAWN = 0,
-  
-  // 变换行为（如旋转、缩放）：优先级 10-19
+
+  // 变换行为（如旋转、缩放）
   TRANSFORM = 10,
-  
-  // 移动行为（如速度、加速度）：优先级 20-29
+
+    
+  // 移动行为（如速度、加速度）
   MOVEMENT = 20,
-  
-  // 外观行为（如颜色、透明度）：优先级 30-39
+
+
+
+  // 外观行为（如颜色、透明度）
   APPEARANCE = 30,
   
-  // 特殊行为（如碰撞、生命周期）：优先级 40-49
+  // 特殊行为（如碰撞、生命周期）
   SPECIAL = 40
 }
 

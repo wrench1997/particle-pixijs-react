@@ -13,7 +13,7 @@ export class AlphaBehavior implements IBehavior {
     throw new Error('Method not implemented.');
   }
   type = 'alpha';
-  order = BehaviorPriority.APPEARANCE; // 优先级 30
+  order = BehaviorPriority.APPEARANCE; 
   
   
   init(particle: any, config: any): void {
@@ -35,7 +35,7 @@ export class ScaleBehavior implements IBehavior {
     throw new Error('Method not implemented.');
   }
   type = 'scale';
-  order = BehaviorPriority.TRANSFORM + 1; // 优先级 11
+  order = BehaviorPriority.TRANSFORM + 1; 
   
   init(particle: any, config: any): void {
     if (config.scale && config.scale.list) {
@@ -56,7 +56,7 @@ export class ColorBehavior implements IBehavior {
     throw new Error('Method not implemented.');
   }
   type = 'color';
-  order = BehaviorPriority.APPEARANCE + 1; // 优先级 31
+  order = BehaviorPriority.APPEARANCE + 1; 
   
   init(particle: any, config: any): void {
     if (config.color && config.color.list) {
@@ -78,7 +78,7 @@ export class RotationStaticBehavior implements IBehavior {
     throw new Error('Method not implemented.');
   }
   type = 'rotationStatic';
-  order = BehaviorPriority.TRANSFORM + 2; // 优先级 12
+  order = BehaviorPriority.TRANSFORM + 2;
   
   init(particle: any, config: any): void {
     if (config.min !== undefined && config.max !== undefined) {
@@ -99,7 +99,7 @@ export class TextureBehavior implements IBehavior {
     throw new Error('Method not implemented.');
   }
   type = 'textureSingle';
-  order = BehaviorPriority.APPEARANCE + 3; // 优先级 33
+  order = BehaviorPriority.APPEARANCE + 3;
   
   init(particle: any, config: any): void {
     if (config.texture) {

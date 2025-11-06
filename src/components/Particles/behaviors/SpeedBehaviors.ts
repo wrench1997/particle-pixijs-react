@@ -1,4 +1,3 @@
-
 // src/components/Particles/behaviors/SpeedBehaviors.ts
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -26,7 +25,7 @@ import { BehaviorPriority } from '../ParticleBehaviorSystem';
 // 静态移动速度行为
 export class MoveSpeedStaticBehavior implements IBehavior {
     type = 'moveSpeedStatic';
-    order = BehaviorPriority.MOVEMENT; // 优先级 20
+    order = BehaviorPriority.MOVEMENT; 
     updateGlobal: any;
 
     private min: number = 0;
@@ -48,28 +47,22 @@ export class MoveSpeedStaticBehavior implements IBehavior {
       // 随机生成速度值
       const speed = (Math.random() * (this.max - this.min)) + this.min;
       
-        // 确保 particle.config 存在
-        if (!particle.config) {
-            particle.config = {};
-        }
-
-
-      // 初始化速度向量
-      if (!particle.config.velocity) {
-        particle.config.velocity = new PIXI.Point(speed, 0);
+      // 确保 particle.velocity 存在且只有 x 和 y 属性
+      if (!particle.velocity) {
+        particle.velocity = { x: speed, y: 0 };
       } else {
-        particle.config.velocity.set(speed, 0);
+        particle.velocity.x = speed;
+        particle.velocity.y = 0;
       }
       
       // 根据粒子旋转角度旋转速度向量
-      rotatePoint(particle.rotation, particle.config.velocity);
+      rotatePoint(particle.rotation, particle.velocity);
     }
   
     update(particle: any, deltaTime: number, progress: number): void {
       // 更新粒子位置
-      const velocity = particle.config.velocity;
-      particle.x += velocity.x * deltaTime;
-      particle.y += velocity.y * deltaTime;
+      particle.x += particle.velocity.x * deltaTime;
+      particle.y += particle.velocity.y * deltaTime;
     }
   }
 
@@ -92,7 +85,7 @@ export class MoveSpeedStaticBehavior implements IBehavior {
 export class MoveSpeedBehavior implements IBehavior {
   type = 'moveSpeed';
   updateGlobal: any;
-  order = BehaviorPriority.MOVEMENT + 1; // 优先级 21
+  order = BehaviorPriority.MOVEMENT + 1; 
   
 
   private speedList: {value: number, time: number}[] = [];
@@ -120,19 +113,12 @@ export class MoveSpeedBehavior implements IBehavior {
     // 获取初始速度
     const initialSpeed = this.speedList.length > 0 ? this.speedList[0].value * mult : 0;
     
-    // 初始化速度向量 - 确保它是一个 PIXI.Point 对象
+    // 初始化速度向量 - 确保它只有 x 和 y 属性
     if (!particle.velocity) {
-      particle.velocity = new PIXI.Point(initialSpeed, 0);
-    } else if (typeof particle.velocity.set !== 'function') {
-      // 如果 velocity 存在但不是 PIXI.Point 对象，则创建一个新的
-      const oldVelocity = particle.velocity;
-      particle.velocity = new PIXI.Point(
-        typeof oldVelocity.x === 'number' ? oldVelocity.x : initialSpeed,
-        typeof oldVelocity.y === 'number' ? oldVelocity.y : 0
-      );
+      particle.velocity = { x: initialSpeed, y: 0 };
     } else {
-      // 如果是有效的 PIXI.Point 对象，则直接设置值
-      particle.velocity.set(initialSpeed, 0);
+      particle.velocity.x = initialSpeed;
+      particle.velocity.y = 0;
     }
     
     // 根据粒子旋转角度旋转速度向量
@@ -145,8 +131,21 @@ export class MoveSpeedBehavior implements IBehavior {
     
     // 保持方向，更新速度大小
     const vel = particle.velocity;
-    normalize(vel);
-    scaleBy(vel, speed);
+    const currentLength = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+    
+    if (currentLength > 0) {
+      // 归一化向量
+      const normalizedX = vel.x / currentLength;
+      const normalizedY = vel.y / currentLength;
+      
+      // 应用新速度
+      vel.x = normalizedX * speed;
+      vel.y = normalizedY * speed;
+    } else {
+      // 如果速度为0，则设置为默认方向
+      vel.x = speed;
+      vel.y = 0;
+    }
     
     // 更新粒子位置
     particle.x += vel.x * deltaTime;
@@ -223,11 +222,11 @@ export class MoveSpeedBehavior implements IBehavior {
 export class AccelerationBehavior implements IBehavior {
     type = 'moveAcceleration';
     updateGlobal: any;
-    order = BehaviorPriority.MOVEMENT + 2; // 优先级 22
+    order = BehaviorPriority.MOVEMENT + 2;
   
     private minStart: number = 0;
     private maxStart: number = 0;
-    private accel: PIXI.Point = new PIXI.Point(0, 0);
+    private accel: {x: number, y: number} = {x: 0, y: 0};
     private rotate: boolean = false;
     private maxSpeed: number = 0;
   
@@ -248,16 +247,20 @@ export class AccelerationBehavior implements IBehavior {
       this.maxSpeed = config.maxSpeed || 0;
       
       const speed = (Math.random() * (this.maxStart - this.minStart)) + this.minStart;
-      if (!particle.config.velocity) {
-        particle.config.velocity = new PIXI.Point(speed, 0);
+      
+      // 确保 particle.velocity 存在且只有 x 和 y 属性
+      if (!particle.velocity) {
+        particle.velocity = { x: speed, y: 0 };
       } else {
-        particle.config.velocity.set(speed, 0);
+        particle.velocity.x = speed;
+        particle.velocity.y = 0;
       }
-      rotatePoint(particle.rotation, particle.config.velocity);
+      
+      rotatePoint(particle.rotation, particle.velocity);
     }
   
     update(particle: any, deltaTime: number, progress: number): void {
-      const vel = particle.config.velocity;
+      const vel = particle.velocity;
       const oldVX = vel.x;
       const oldVY = vel.y;
       
@@ -265,9 +268,11 @@ export class AccelerationBehavior implements IBehavior {
       vel.y += this.accel.y * deltaTime;
       
       if (this.maxSpeed) {
-        const currentSpeed = length(vel);
+        const currentSpeed = Math.sqrt(vel.x * vel.x + vel.y * vel.y);
         if (currentSpeed > this.maxSpeed) {
-          scaleBy(vel, this.maxSpeed / currentSpeed);
+          const ratio = this.maxSpeed / currentSpeed;
+          vel.x *= ratio;
+          vel.y *= ratio;
         }
       }
       
@@ -295,7 +300,7 @@ export class AccelerationBehavior implements IBehavior {
  */
 export class DragBehavior implements IBehavior {
   type = 'drag';
-  order = BehaviorPriority.MOVEMENT + 4; // 优先级 24
+  order = BehaviorPriority.MOVEMENT + 4; 
   updateGlobal: any;
   private factor: number = 0.95;
 
@@ -337,9 +342,9 @@ export class DragBehavior implements IBehavior {
  */
 export class GravityBehavior implements IBehavior {
   type = 'gravity';
-  order = BehaviorPriority.MOVEMENT + 5; // 优先级 25
+  order = BehaviorPriority.MOVEMENT + 5; 
   updateGlobal: any;
-  private gravity: PIXI.Point = new PIXI.Point(0, 98);
+  private gravity: {x: number, y: number} = {x: 0, y: 98};
 
   constructor() {
     // 空构造函数，符合 new () => IBehavior 要求
@@ -351,7 +356,7 @@ export class GravityBehavior implements IBehavior {
 
   init(particle: any, config: any): void {
     // 在init方法中处理配置
-    this.gravity = new PIXI.Point(config.x || 0, config.y || 98);
+    this.gravity = {x: config.x || 0, y: config.y || 98};
   }
 
   update(particle: any, deltaTime: number, progress: number): void {

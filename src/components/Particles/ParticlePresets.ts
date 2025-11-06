@@ -131,7 +131,7 @@ export const fireEffect: ParticleConfig = {
         data: {
           x: 0,
           y: 0,
-          radius: 10,
+          radius: 0,
           innerRadius: 0,
           affectRotation: false
         }
@@ -157,22 +157,39 @@ export const createFireTextureEffect = (textures: PIXI.Texture | PIXI.Texture[])
 
 
 
+export const createWaterTextureEffect = (textures: PIXI.Texture | PIXI.Texture[]): ParticleConfig => {
+  const baseConfig = {...waterEffect};
+  
+  // 添加纹理行为
+  baseConfig.behaviors.push({
+    type: 'textureRandom',
+    config: {
+      textures: Array.isArray(textures) ? textures : [textures]
+    }
+  });
+  
+  return baseConfig;
+};
+
+
 // 水效果
 export const waterEffect: ParticleConfig = {
   lifetime: {
-    min: 0.8,
-    max: 0.8
+    min: 0.25,
+    max: 0.5
   },
-  frequency: 0.01,
+  
+  frequency: 0.001,
   spawnChance: 1,
   particlesPerWave: 2,
   emitterLifetime: 0, // 无限
-  maxParticles: 200,
+  maxParticles: 5000,
+  addAtBack: false,
   pos: {
     x: 0,
     y: 0
   },
-  addAtBack: false,
+
   behaviors: [
     {
       type: 'alpha',
@@ -180,17 +197,37 @@ export const waterEffect: ParticleConfig = {
         alpha: {
           list: [
             {
-              value: 0.7,
+              value: 1,
               time: 0
             },
             {
-              value: 0.1,
+              value:0.31,
               time: 1
             }
           ],
         },
       }
     },
+    {
+      type: 'rotationStatic',
+      config: {
+        min:260,
+        max:280,
+      }
+    },
+    {
+      type: "moveAcceleration",
+      config: {
+        accel: {
+          x: 0,
+          y: 2000
+        },
+        minStart: 600,
+        maxStart: 600,
+        rotate: true
+      }
+    },
+
     {
       type: 'scale',
       config: {
@@ -201,7 +238,7 @@ export const waterEffect: ParticleConfig = {
               time: 0
             },
             {
-              value: 0.2,
+              value:1,
               time: 1
             }
           ],
@@ -214,50 +251,28 @@ export const waterEffect: ParticleConfig = {
         color: {
           list: [
             {
-              value: "3399ff",
+              value: "ffffff",
               time: 0
             },
             {
-              value: "99ccff",
+              value: "9ff3ff",
               time: 1
             }
           ],
         },
       }
     },
+
     {
-      type: 'moveSpeed',
+      type: "spawnShape",
       config: {
-        speed: {
-          list: [
-            {
-              value: 80,
-              time: 0
-            },
-            {
-              value: 40,
-              time: 1
-            }
-          ],
-          isStepped: false
-        },
-      }
-    },
-    {
-      type: 'rotationStatic',
-      config: {
-        min: 0,
-        max: 360
-      }
-    },
-    {
-      type: 'spawnShape',
-      config: {
-        type: 'circle',
+        type: 'torus',
         data: {
           x: 0,
           y: 0,
-          radius: 20
+          radius: 0,
+          innerRadius: 0,
+          affectRotation: true
         }
       }
     }
@@ -361,8 +376,8 @@ export const explosionEffect: ParticleConfig = {
     {
       type: 'rotationStatic',
       config: {
-        min: 0,
-        max: 360
+        min: -90,  // 左上
+        max: 90    // 右上
       }
     },
     {

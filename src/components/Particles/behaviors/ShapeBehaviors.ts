@@ -188,10 +188,6 @@ export class SpawnShapeBehavior implements IBehavior {
           // 添加中心点偏移
           particle.x += x;
           particle.y += y;
-          const speed = particle.speedList.length > 0 ? particle.speedList[0].value : 100;
-          particle.velocity.x = speed;
-          particle.velocity.y = speed;
-
         }
         break;
       case 'circle':
@@ -217,10 +213,6 @@ export class SpawnShapeBehavior implements IBehavior {
           if (config.data.affectRotation) {
             particle.rotation = angle;
           }
-          
-          const speed = particle.speedList.length > 0 ? particle.speedList[0].value : 100;
-          particle.velocity.x = Math.cos(angle) * speed;
-          particle.velocity.y = Math.sin(angle) * speed;
         }
         break;
         

@@ -6,7 +6,7 @@ import { extend } from '@pixi/react';
 // 导入增强版粒子系统
 import { ParticleSystemEnhanced, type ParticleConfig } from './ParticleSystemEnhanced';
 import { 
-  fireEffect, createFireTextureEffect, waterEffect, explosionEffect, 
+  fireEffect, createFireTextureEffect,createWaterTextureEffect, waterEffect, explosionEffect, 
   magicEffect, arrowParticleEffect 
 } from './ParticlePresets';
 
@@ -61,19 +61,22 @@ export const ParticleDemo = () => {
   const [texturesLoaded, setTexturesLoaded] = useState(false);
   const [particleTexture, setParticleTexture] = useState<Texture | null>(null);
   const [fireTexture, setFireTexture] = useState<Texture | null>(null);
+  const [waterTexture, setWaterTexture] = useState<Texture | null>(null);
 
   // 预加载纹理
   useEffect(() => {
     const loadTextures = async () => {
       try {
         // 使用 Assets.load 异步加载纹理
-        const [particle, fire] = await Promise.all([
+        const [particle, fire, water] = await Promise.all([
           Assets.load('assets/particle.png'),
           Assets.load('assets/Fire.png'),
+          Assets.load('assets/Sparks.png'),
         ]);
         
         setParticleTexture(particle);
         setFireTexture(fire);
+        setWaterTexture(water);
         setTexturesLoaded(true);
       } catch (error) {
         console.error('纹理加载失败:', error);
@@ -91,7 +94,9 @@ export const ParticleDemo = () => {
         return fireTexture && particleTexture  ? 
           [createFireTextureEffect([particleTexture, fireTexture])] : 
           [fireEffect];
-      case 'water': return [waterEffect];
+      case 'water': return waterTexture? 
+      [createWaterTextureEffect([waterTexture])] : 
+      [waterEffect];
       case 'explosion': return [explosionEffect];
       case 'magic': return [magicEffect];
       case 'arrow': return [arrowParticleEffect]; // 新增
