@@ -243,7 +243,6 @@ private adjustCameraBasedOnTarget(): void {
   // 设置2D目标点的方法 - 修改为同时更新相机位置和方向
   setTarget(x: number, y: number): void {
     this.target2D = { x, y };
-    this.convertTargetToDirection();
     this.adjustCameraBasedOnTarget(); // 添加这一行
 
     // 如果着色器已经创建，立即更新uniform
