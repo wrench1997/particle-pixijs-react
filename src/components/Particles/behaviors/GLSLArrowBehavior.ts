@@ -22,15 +22,18 @@ export class GLSLArrowBehavior implements IBehavior {
   private arrowRotationSpeed: number = 10; // 默认旋转速度
   private autoRotate: boolean = true; // 是否自动旋转
   
-  // 新增：箭矢缩放属性
-  private arrowScale: number = 0.8; // 默认缩放值，设为0.5使箭矢变小
+  // 箭矢缩放属性
+  private arrowScale: number = 0.6; // 默认缩放值
   
   // 相机设置
-  private cameraPosition: { x: number, y: number, z: number } = { x: 0, y: 6, z: -2.15  };
+  private cameraPosition: { x: number, y: number, z: number } = { x: 0, y: 6, z: -2.1 };
   private cameraDirection: { x: number, y: number, z: number } = { x: 0, y: -6, z: 2 };
-  private trackTarget: boolean = false; // 是否跟踪目标
+  private trackTarget: boolean = true; // 是否跟踪目标
   private trackSpeed: number = 0.1; // 跟踪速度
   private targetPosition: { x: number, y: number, z: number } = { x: 0, y: 0, z: 0 };
+  
+  // 2D目标点
+  private target2D: { x: number, y: number } = { x:0 , y:0 };
   
   constructor() {
     // 空构造函数
@@ -42,6 +45,13 @@ export class GLSLArrowBehavior implements IBehavior {
       this.arrowDirection = { ...this.arrowDirection, ...config.direction };
     }
     
+    // 处理2D目标点 - 新增
+    if (config.target) {
+      this.target2D = { ...this.target2D, ...config.target };
+      // 根据2D目标点调整相机位置和方向
+      this.adjustCameraBasedOnTarget();
+    }
+    
     if (config.rotationSpeed !== undefined) {
       this.arrowRotationSpeed = config.rotationSpeed;
     }
@@ -50,18 +60,20 @@ export class GLSLArrowBehavior implements IBehavior {
       this.autoRotate = config.autoRotate;
     }
     
-    // 新增：读取缩放设置
+    // 读取缩放设置
     if (config.scale !== undefined) {
       this.arrowScale = config.scale;
     }
     
-    // 读取相机设置
-    if (config.cameraPosition) {
-      this.cameraPosition = { ...this.cameraPosition, ...config.cameraPosition };
-    }
-    
-    if (config.cameraDirection) {
-      this.cameraDirection = { ...this.cameraDirection, ...config.cameraDirection };
+    // 读取相机设置 - 只有在没有target时才直接使用配置的相机设置
+    if (!config.target) {
+      if (config.cameraPosition) {
+        this.cameraPosition = { ...this.cameraPosition, ...config.cameraPosition };
+      }
+      
+      if (config.cameraDirection) {
+        this.cameraDirection = { ...this.cameraDirection, ...config.cameraDirection };
+      }
     }
     
     // 读取目标跟踪设置
@@ -78,6 +90,28 @@ export class GLSLArrowBehavior implements IBehavior {
     }
   }
   
+
+// 新增：根据2D目标点调整相机位置和方向
+private adjustCameraBasedOnTarget(): void {
+  // 根据目标点的位置调整相机位置
+  const targetMagnitude = Math.sqrt(this.target2D.x * this.target2D.x + this.target2D.y * this.target2D.y);
+  const targetAngle = Math.atan2(this.target2D.y, this.target2D.x);
+  
+  // 调整相机位置 - 使相机位置随目标点变化
+  this.cameraPosition = {
+    x: 3 * Math.sin(targetAngle),
+    y: 6 + targetMagnitude * 0.1, // 目标越远，相机位置越高
+    z: -2.1 - targetMagnitude * 0.1 // 目标越远，相机位置越后
+  };
+  
+  // 调整相机方向 - 始终指向目标点的方向
+  this.cameraDirection = {
+    x: -this.cameraPosition.x,
+    y: -this.cameraPosition.y + targetMagnitude * 0.2, // 调整垂直方向
+    z: 2 + targetMagnitude * 0.1 // 调整深度方向
+  };
+}
+
   // 批量初始化方法，用于设置全局箭头渲染器
   initParticles(container: Container): void {
     if (this.active) return; // 避免重复初始化
@@ -118,9 +152,7 @@ export class GLSLArrowBehavior implements IBehavior {
           u_direction: { type: 'vec3<f32>', value: [this.arrowDirection.x, this.arrowDirection.y, this.arrowDirection.z] },
           u_rotationSpeed: { type: 'f32', value: this.arrowRotationSpeed },
           u_autoRotate: { type: 'f32', value: this.autoRotate ? 1.0 : 0.0 },
-          // 新增：箭矢缩放的 uniform
           u_arrowScale: { type: 'f32', value: this.arrowScale },
-          // 相机设置的 uniform
           u_cameraPosition: { type: 'vec3<f32>', value: [this.cameraPosition.x, this.cameraPosition.y, this.cameraPosition.z] },
           u_cameraDirection: { type: 'vec3<f32>', value: [this.cameraDirection.x, this.cameraDirection.y, this.cameraDirection.z] },
           u_trackTarget: { type: 'f32', value: this.trackTarget ? 1.0 : 0.0 },
@@ -139,12 +171,19 @@ export class GLSLArrowBehavior implements IBehavior {
   
   update(particle: any, deltaTime: number, progress: number): void {
     // 这个方法不会用于更新单个粒子
+    
   }
   
   // 全局更新方法，用于更新箭头渲染器
   updateGlobal(deltaTime: number): void {
     if (!this.active || !this.mesh) return;
     
+
+    // // 将2D目标点转换为3D方向向量
+    // this.convertTargetToDirection();
+
+    // 根据2D目标点调整相机位置和方向
+    this.adjustCameraBasedOnTarget();
     // 更新时间
     this.time += deltaTime;
     
@@ -158,7 +197,7 @@ export class GLSLArrowBehavior implements IBehavior {
     this.mesh.shader.resources.uniforms.uniforms.u_rotationSpeed = this.arrowRotationSpeed;
     this.mesh.shader.resources.uniforms.uniforms.u_autoRotate = this.autoRotate ? 1.0 : 0.0;
     
-    // 新增：更新箭矢缩放
+    // 更新箭矢缩放
     this.mesh.shader.resources.uniforms.uniforms.u_arrowScale = this.arrowScale;
     
     // 更新相机设置
@@ -201,6 +240,34 @@ export class GLSLArrowBehavior implements IBehavior {
     this.active = false;
   }
   
+  // 设置2D目标点的方法 - 修改为同时更新相机位置和方向
+  setTarget(x: number, y: number): void {
+    this.target2D = { x, y };
+    this.convertTargetToDirection();
+    this.adjustCameraBasedOnTarget(); // 添加这一行
+
+    // 如果着色器已经创建，立即更新uniform
+    if (this.mesh && this.mesh.shader) {
+      this.mesh.shader.resources.uniforms.uniforms.u_direction = [
+        this.arrowDirection.x,
+        this.arrowDirection.y,
+        this.arrowDirection.z
+      ];
+      
+      // 更新相机位置和方向
+      this.mesh.shader.resources.uniforms.uniforms.u_cameraPosition = [
+        this.cameraPosition.x,
+        this.cameraPosition.y,
+        this.cameraPosition.z
+      ];
+      this.mesh.shader.resources.uniforms.uniforms.u_cameraDirection = [
+        this.cameraDirection.x,
+        this.cameraDirection.y,
+        this.cameraDirection.z
+      ];
+    }
+  }
+  
   // 设置箭矢方向的方法
   setDirection(x: number, y: number, z: number): void {
     this.arrowDirection = { x, y, z };
@@ -231,7 +298,7 @@ export class GLSLArrowBehavior implements IBehavior {
     }
   }
   
-  // 新增：设置箭矢缩放的方法
+  // 设置箭矢缩放的方法
   setScale(scale: number): void {
     this.arrowScale = scale;
     
@@ -290,63 +357,7 @@ export class GLSLArrowBehavior implements IBehavior {
       this.mesh.shader.resources.uniforms.uniforms.u_trackSpeed = speed;
     }
   }
-
-
-
-  // 在GLSLArrowBehavior类中添加这个方法
-  setTargetFromScreenWithAngles(x: number, y: number): void {
-    const containerWidth = this.container?.width || 800;
-    const containerHeight = this.container?.height || 600;
-    
-    // 计算相对于屏幕中心的偏移
-    const offsetX = (x - containerWidth / 2) / (containerWidth / 2);
-    const offsetY = -(y - containerHeight / 2) / (containerHeight / 2);
-    
-    // 将偏移转换为角度（可以调整系数来控制灵敏度）
-    const yawAngle = offsetX * Math.PI * 0.5; // 水平旋转角度
-    const pitchAngle = offsetY * Math.PI * 0.5; // 垂直俯仰角度
-    
-    // 使用球坐标系计算方向向量
-    const dirX = Math.sin(yawAngle) * Math.cos(pitchAngle);
-    const dirY = Math.sin(pitchAngle);
-    const dirZ = Math.cos(yawAngle) * Math.cos(pitchAngle);
-    
-    // 更新相机方向
-    this.cameraDirection = {
-      x: dirX,
-      y: dirY,
-      z: dirZ
-    };
-    
-    // 如果着色器已经创建，立即更新uniform
-    if (this.mesh && this.mesh.shader) {
-      this.mesh.shader.resources.uniforms.uniforms.u_cameraDirection = [
-        this.cameraDirection.x,
-        this.cameraDirection.y,
-        this.cameraDirection.z
-      ];
-    }
-    
-    // 计算目标位置（相机位置 + 方向向量 * 距离）
-    const distance = 5.0; // 可以根据需要调整
-    this.targetPosition = {
-      x: this.cameraPosition.x + dirX * distance,
-      y: this.cameraPosition.y + dirY * distance,
-      z: this.cameraPosition.z + dirZ * distance
-    };
-    
-    if (this.mesh && this.mesh.shader) {
-      this.mesh.shader.resources.uniforms.uniforms.u_targetPosition = [
-        this.targetPosition.x,
-        this.targetPosition.y,
-        this.targetPosition.z
-      ];
-    }
-    
-    // 确保跟踪目标功能已启用
-    this.setTrackTarget(true);
-  }
-
+  
   // 顶点着色器代码
   private getVertexShader(): string {
     return `
@@ -362,7 +373,7 @@ export class GLSLArrowBehavior implements IBehavior {
     `;
   }
   
-  // 片段着色器代码 - 修改以支持箭矢缩放
+  // 片段着色器代码
   private getFragmentShader(): string {
     return `
       precision mediump float;
@@ -373,7 +384,7 @@ export class GLSLArrowBehavior implements IBehavior {
       uniform float u_rotationSpeed;
       uniform float u_autoRotate;
       
-      // 新增：箭矢缩放 uniform
+      // 箭矢缩放 uniform
       uniform float u_arrowScale;
       
       // 相机控制 uniforms
@@ -445,7 +456,7 @@ export class GLSLArrowBehavior implements IBehavior {
           return min(min(d1, d2), d3);
       }
       
-      // 卡通箭矢 SDF - 修改以支持缩放
+      // 卡通箭矢 SDF - 支持缩放
       float arrowSDF(vec3 p) {
           // 应用缩放 - 将点坐标除以缩放因子，使箭矢变小
           p = p / u_arrowScale;

@@ -703,18 +703,14 @@ export const arrowParticleEffect: ParticleConfig = {
     {
       type: 'glslArrow',
       config: {
-        // 初始方向
-        direction: { x: 0, y: 0, z: 6 },
-        // 旋转速度
-        rotationSpeed: 0.5,
-        // 是否自动旋转
-        autoRotate: false,
-        // 启用目标跟踪
-        trackTarget: true,
-        // 跟踪速度 (0-1)，值越大转向越快
-        trackSpeed: 0.1,
-        // 可选：初始目标位置
-        targetPosition: { x: 200, y: 100 }
+        // 目标坐标 - 箭矢将指向这个点
+        target: { x: 200, y: 100 },
+        
+        // 可选配置
+        autoRotate: false,        // 禁用自动旋转
+        scale: 0.8,               // 箭矢缩放
+        trackTarget: true,        // 启用目标跟踪
+        trackSpeed: 0.1           // 跟踪速度
       }
     }
   ]
