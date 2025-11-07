@@ -181,9 +181,9 @@ export const waterEffect: ParticleConfig = {
   
   frequency: 0.001,
   spawnChance: 1,
-  particlesPerWave: 2,
+  particlesPerWave: 30,
   emitterLifetime: 0, // 无限
-  maxParticles: 5000,
+  maxParticles: 2000,
   addAtBack: false,
   pos: {
     x: 0,

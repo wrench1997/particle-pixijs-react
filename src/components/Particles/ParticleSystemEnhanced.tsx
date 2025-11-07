@@ -510,7 +510,7 @@ class EnhancedParticleEmitter {
     }
     
     // 生成新粒子
-    if (this.elapsed >= this.nextSpawnTime) {
+    if(this.elapsed >= this.nextSpawnTime) {
       this.elapsed = 0;
       this.nextSpawnTime = this.config.frequency;
       
