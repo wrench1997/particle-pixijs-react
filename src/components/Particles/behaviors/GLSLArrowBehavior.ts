@@ -163,10 +163,12 @@ private adjustCameraBasedOnTarget(): void {
     });
     
     // 创建网格
-    this.mesh = new Mesh({ geometry, shader });
-    
-    // 添加到容器
-    container.addChild(this.mesh);
+    this.mesh = new Mesh({ geometry, shader }) as Mesh;
+
+    if (this.mesh) {
+        container.addChild(this.mesh);
+    }
+
   }
   
   update(particle: any, deltaTime: number, progress: number): void {
@@ -179,55 +181,54 @@ private adjustCameraBasedOnTarget(): void {
     if (!this.active || !this.mesh) return;
     
 
-    // // 将2D目标点转换为3D方向向量
-    // this.convertTargetToDirection();
 
     // 根据2D目标点调整相机位置和方向
     this.adjustCameraBasedOnTarget();
     // 更新时间
     this.time += deltaTime;
-    
-    // 更新着色器 uniforms
-    this.mesh.shader.resources.uniforms.uniforms.u_time = this.time;
-    this.mesh.shader.resources.uniforms.uniforms.u_direction = [
-      this.arrowDirection.x, 
-      this.arrowDirection.y, 
-      this.arrowDirection.z
-    ];
-    this.mesh.shader.resources.uniforms.uniforms.u_rotationSpeed = this.arrowRotationSpeed;
-    this.mesh.shader.resources.uniforms.uniforms.u_autoRotate = this.autoRotate ? 1.0 : 0.0;
-    
-    // 更新箭矢缩放
-    this.mesh.shader.resources.uniforms.uniforms.u_arrowScale = this.arrowScale;
-    
-    // 更新相机设置
-    this.mesh.shader.resources.uniforms.uniforms.u_cameraPosition = [
-      this.cameraPosition.x,
-      this.cameraPosition.y,
-      this.cameraPosition.z
-    ];
-    this.mesh.shader.resources.uniforms.uniforms.u_cameraDirection = [
-      this.cameraDirection.x,
-      this.cameraDirection.y,
-      this.cameraDirection.z
-    ];
-    this.mesh.shader.resources.uniforms.uniforms.u_trackTarget = this.trackTarget ? 1.0 : 0.0;
-    this.mesh.shader.resources.uniforms.uniforms.u_trackSpeed = this.trackSpeed;
-    this.mesh.shader.resources.uniforms.uniforms.u_targetPosition = [
-      this.targetPosition.x,
-      this.targetPosition.y,
-      this.targetPosition.z
-    ];
-    
-    // 如果容器大小改变，更新分辨率
-    if (this.container) {
-      const renderer = this.container.renderer;
-      if (renderer) {
-        this.mesh.shader.resources.uniforms.uniforms.u_resolution = [
-          renderer.width,
-          renderer.height
+    if (this.mesh && this.mesh.shader) {
+        // 更新着色器 uniforms
+        this.mesh.shader.resources.uniforms.uniforms.u_time = this.time;
+        this.mesh.shader.resources.uniforms.uniforms.u_direction = [
+        this.arrowDirection.x, 
+        this.arrowDirection.y, 
+        this.arrowDirection.z
         ];
-      }
+        this.mesh.shader.resources.uniforms.uniforms.u_rotationSpeed = this.arrowRotationSpeed;
+        this.mesh.shader.resources.uniforms.uniforms.u_autoRotate = this.autoRotate ? 1.0 : 0.0;
+        
+        // 更新箭矢缩放
+        this.mesh.shader.resources.uniforms.uniforms.u_arrowScale = this.arrowScale;
+        
+        // 更新相机设置
+        this.mesh.shader.resources.uniforms.uniforms.u_cameraPosition = [
+        this.cameraPosition.x,
+        this.cameraPosition.y,
+        this.cameraPosition.z
+        ];
+        this.mesh.shader.resources.uniforms.uniforms.u_cameraDirection = [
+        this.cameraDirection.x,
+        this.cameraDirection.y,
+        this.cameraDirection.z
+        ];
+        this.mesh.shader.resources.uniforms.uniforms.u_trackTarget = this.trackTarget ? 1.0 : 0.0;
+        this.mesh.shader.resources.uniforms.uniforms.u_trackSpeed = this.trackSpeed;
+        this.mesh.shader.resources.uniforms.uniforms.u_targetPosition = [
+        this.targetPosition.x,
+        this.targetPosition.y,
+        this.targetPosition.z
+        ];
+        
+        // 如果容器大小改变，更新分辨率
+        // if (this.container) {
+        //     const renderer = this.container.renderer;
+        //     if (renderer) {
+        //         this.mesh.shader.resources.uniforms.uniforms.u_resolution = [
+        //         renderer.width,
+        //         renderer.height
+        //         ];
+        //     }
+        // }
     }
   }
   

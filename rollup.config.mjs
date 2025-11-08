@@ -1,24 +1,25 @@
-// rollup.config.js
+// rollup.config.mjs
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-import dts from 'rollup-plugin-dts';
+import { readFileSync } from 'fs';
 
-const packageJson = require('./package.json');
+// Parse package.json
+const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
 
 export default [
   {
     input: 'src/index.ts',
     output: [
       {
-        file: packageJson.main,
+        file: pkg.main,
         format: 'cjs',
         sourcemap: true,
       },
       {
-        file: packageJson.module,
+        file: pkg.module,
         format: 'esm',
         sourcemap: true,
       },
@@ -27,17 +28,12 @@ export default [
       peerDepsExternal(),
       resolve(),
       commonjs(),
-      typescript({
+      typescript({ 
         tsconfig: './tsconfig.lib.json',
-        exclude: ['**/__tests__/**', '**/*.test.ts', '**/*.test.tsx']
+        declaration: false, // We'll handle declarations separately
       }),
       terser(),
     ],
     external: ['react', 'react-dom', 'pixi.js', '@pixi/react'],
-  },
-  {
-    input: 'dist/types/index.d.ts',
-    output: [{ file: 'dist/index.d.ts', format: 'esm' }],
-    plugins: [dts()],
-  },
+  }
 ];

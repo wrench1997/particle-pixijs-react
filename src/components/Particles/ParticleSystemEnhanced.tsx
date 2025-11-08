@@ -87,7 +87,6 @@ if (!behaviorsRegistered) {
 
 // 粒子配置接口
 export interface ParticleConfig {
-  globalBehaviors: boolean;
   lifetime: {
     min: number;
     max: number;
@@ -554,8 +553,11 @@ class EnhancedParticleEmitter {
   // 新增：收集所有纹理路径
   private collectTexturePaths(): string[] {
     const paths: string[] = [];
-    const behaviors = [...this.config.behaviors, ...(this.config.globalBehaviors || [])]; // 支持globalBehaviors
-
+    const behaviors = [
+      ...this.config.behaviors, 
+      ...(Array.isArray(this.config.globalBehaviors) ? this.config.globalBehaviors : [])
+    ];
+    
     for (const b of behaviors) {
       if (b.type === 'textureSingle') {
         if (typeof b.config.texture === 'string') {
@@ -672,24 +674,25 @@ class EnhancedParticleEmitter {
     particle.behaviors = [];
     
     for (const behaviorConfig of this.config.behaviors) {
-      // 获取或创建行为实例
-      let behavior = this.behaviorInstances.get(behaviorConfig.type);
-      
-      if (!behavior) {
-        behavior = behaviorRegistry.create(behaviorConfig.type);
+        // 获取或创建行为实例
+        let behavior = this.behaviorInstances.get(behaviorConfig.type);
+        
+        if (!behavior) {
+            const createdBehavior = behaviorRegistry.create(behaviorConfig.type);
+            
+            if (createdBehavior) {
+                behavior = createdBehavior;
+                this.behaviorInstances.set(behaviorConfig.type, behavior);
+            }
+        }
         
         if (behavior) {
-          this.behaviorInstances.set(behaviorConfig.type, behavior);
+            // 初始化行为
+            behavior.init(particle, behaviorConfig.config);
+            
+            // 添加到粒子的行为列表
+            particle.behaviors.push(behavior);
         }
-      }
-      
-      if (behavior) {
-        // 初始化行为
-        behavior.init(particle, behaviorConfig.config);
-        
-        // 添加到粒子的行为列表
-        particle.behaviors.push(behavior);
-      }
     }
     
     // 根据优先级排序行为

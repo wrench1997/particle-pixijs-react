@@ -6,21 +6,16 @@ import type { IBehavior } from '../ParticleBehaviorSystem';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';
 
 
-
 // 动态旋转行为
 export class RotationBehavior implements IBehavior {
   type = 'rotation';
-  updateGlobal: any;
   order = BehaviorPriority.TRANSFORM; // 优先级 10
   
-
   private minSpeed: number = 0;
   private maxSpeed: number = 0;
   private minStart: number = 0;
   private maxStart: number = 0;
   private accel: number = 0;
-
-  
 
   constructor() {
     // 空构造函数，符合 new () => IBehavior 要求

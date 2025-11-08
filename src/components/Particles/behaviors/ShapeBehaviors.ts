@@ -27,33 +27,34 @@ export class PolygonalChain {
   countingLengths: number[] = [];
   updateGlobal: any;
 
-  constructor(data: IPointData[] | IPointData[][]) {
-    // 处理空数据情况
-    if (!data || (Array.isArray(data) && data.length === 0)) {
-      // 创建一个默认段
-      this.segments.push({
-        p1: { x: 0, y: 0 },
-        p2: { x: 0, y: 0 },
-        l: 0
-      });
-      this.totalLength = 0;
-      this.countingLengths = [0];
-      return;
-    }
-
-    // 判断是单条折线还是多条折线
-    if (!Array.isArray(data[0].x)) {
-      // 单条折线
-      this.processChain(data as IPointData[]);
-    } else {
-      // 多条折线
-      for (const chain of data as IPointData[][]) {
-        this.processChain(chain);
+    constructor(data: IPointData[] | IPointData[][]) {
+      // 处理空数据情况
+      if (!data || (Array.isArray(data) && data.length === 0)) {
+          // 创建一个默认段
+          this.segments.push({
+              p1: { x: 0, y: 0 },
+              p2: { x: 0, y: 0 },
+              l: 0
+          });
+          this.totalLength = 0;
+          this.countingLengths = [0];
+          return;
       }
-    }
 
-    // 预计算累计长度
-    this.calculateLengths();
+      // 判断是单条折线还是多条折线
+      // 修复：检查data[0]是否是数组，而不是检查x属性
+      if (!Array.isArray(data[0])) {
+          // 单条折线
+          this.processChain(data as IPointData[]);
+      } else {
+          // 多条折线
+          for (const chain of data as IPointData[][]) {
+              this.processChain(chain);
+          }
+      }
+
+      // 预计算累计长度
+      this.calculateLengths();
   }
 
   // 处理单条折线

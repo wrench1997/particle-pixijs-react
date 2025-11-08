@@ -1,47 +1,33 @@
 // src/components/Particles/ParticleBehaviorSystem.ts
-
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 
-
 export enum BehaviorPriority {
   // 生成行为（如形状生成）
   SPAWN = 0,
-
   // 变换行为（如旋转、缩放）
   TRANSFORM = 10,
-
-    
   // 移动行为（如速度、加速度）
   MOVEMENT = 20,
-
-
-
   // 外观行为（如颜色、透明度）
   APPEARANCE = 30,
-  
   // 特殊行为（如碰撞、生命周期）
   SPECIAL = 40
 }
 
-
-
 export interface IBehavior {
-  cleanup: any;
-  updateGlobal: any;
   type: string;
   order: number; 
   init(particle: any, config: any): void;
   update(particle: any, deltaTime: number, progress: number): void;
   
-  // 添加批量初始化方法
+  // Make these optional
+  cleanup?: any;
+  updateGlobal?: any;
   initParticles?(first: any): void;
 }
-
 
 // 行为注册系统
 class BehaviorRegistry {
@@ -114,10 +100,6 @@ export class ObjectPool<T> {
     return this.pool.length;
   }
 }
-
-
-
-
 
 export class TextureManager {
   private static cache: Map<string, PIXI.Texture> = new Map();
