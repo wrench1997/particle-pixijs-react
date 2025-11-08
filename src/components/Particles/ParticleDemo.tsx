@@ -1,12 +1,12 @@
 
 // src/components/Particles/ParticleDemo.tsx
-import { useState, useCallback, useEffect } from 'react';
-import { Container, Graphics, Text, Texture, Assets } from 'pixi.js';
+import { useState, useCallback } from 'react';
+import { Container, Graphics, Text } from 'pixi.js';
 import { extend } from '@pixi/react';
 // 导入增强版粒子系统
 import { ParticleSystemEnhanced, type ParticleConfig } from './ParticleSystemEnhanced';
 import { 
-  fireEffect, createFireTextureEffect,createWaterTextureEffect, waterEffect, edgeEffect, 
+  fireEffect,  waterEffect, edgeEffect, 
   magicEffect, arrowParticleEffect 
 } from './ParticlePresets';
 
@@ -58,51 +58,19 @@ export const ParticleDemo = () => {
   const [selectedEffect, setSelectedEffect] = useState('fire');
   const [play, setPlay] = useState(true);
   const [scale, setScale] = useState(1);
-  const [texturesLoaded, setTexturesLoaded] = useState(false);
-  const [particleTexture, setParticleTexture] = useState<Texture | null>(null);
-  const [fireTexture, setFireTexture] = useState<Texture | null>(null);
-  const [waterTexture, setWaterTexture] = useState<Texture | null>(null);
 
-  // 预加载纹理
-  useEffect(() => {
-    const loadTextures = async () => {
-      try {
-        // 使用 Assets.load 异步加载纹理
-        const [particle, fire, water] = await Promise.all([
-          Assets.load('assets/particle.png'),
-          Assets.load('assets/Fire.png'),
-          Assets.load('assets/Sparks.png'),
-        ]);
-        
-        setParticleTexture(particle);
-        setFireTexture(fire);
-        setWaterTexture(water);
-        setTexturesLoaded(true);
-      } catch (error) {
-        console.error('纹理加载失败:', error);
-      }
-    };
-    
-    loadTextures();
-  }, []);
-  
   
   // 获取当前选择的效果配置
   const getSelectedConfig = useCallback(() => {
     switch (selectedEffect) {
-      case 'fire': 
-        return fireTexture && particleTexture  ? 
-          [createFireTextureEffect([particleTexture, fireTexture])] : 
-          [fireEffect];
-      case 'water': return waterTexture? 
-      [createWaterTextureEffect([waterTexture])] : 
-      [waterEffect];
+      case 'fire':  return [fireEffect];
+      case 'water': return [waterEffect];
       case 'edgeEffect': return [edgeEffect];
       case 'magic': return [magicEffect];
       case 'arrow': return [arrowParticleEffect]; // 新增
       default: return [magicEffect];
     }
-  }, [selectedEffect, texturesLoaded, particleTexture, fireTexture]);
+  }, [selectedEffect]);
   
   // 绘制按钮
   const drawButton = useCallback((g: Graphics, isSelected: boolean) => {

@@ -1,6 +1,13 @@
 // src/components/Particles/ParticleBehaviorSystem.ts
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+
+import * as PIXI from 'pixi.js';
+import { Assets } from 'pixi.js';
+
+
 export enum BehaviorPriority {
   // 生成行为（如形状生成）
   SPAWN = 0,
@@ -105,5 +112,36 @@ export class ObjectPool<T> {
   // 获取池大小
   get size(): number {
     return this.pool.length;
+  }
+}
+
+
+
+
+
+export class TextureManager {
+  private static cache: Map<string, PIXI.Texture> = new Map();
+
+  static async load(path: string): Promise<PIXI.Texture> {
+    if (this.cache.has(path)) {
+      return this.cache.get(path)!;
+    }
+
+    try {
+      const texture = await Assets.load(path);
+      this.cache.set(path, texture);
+      return texture;
+    } catch (error) {
+      console.error(`纹理加载失败: ${path}`, error);
+      return PIXI.Texture.EMPTY; // 返回空纹理作为fallback
+    }
+  }
+
+  static async loadAll(paths: string[]): Promise<PIXI.Texture[]> {
+    return Promise.all(paths.map((p) => this.load(p)));
+  }
+
+  static get(path: string): PIXI.Texture | undefined {
+    return this.cache.get(path);
   }
 }

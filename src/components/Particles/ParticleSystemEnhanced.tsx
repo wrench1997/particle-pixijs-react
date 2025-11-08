@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // src/components/Particles/ParticleSystemEnhanced.tsx
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Container, Graphics, Sprite } from 'pixi.js';
 import { extend, useTick } from '@pixi/react';
 import * as PIXI from 'pixi.js';
-import { behaviorRegistry, ObjectPool, type IBehavior } from './ParticleBehaviorSystem';
+import { behaviorRegistry, ObjectPool, TextureManager, type IBehavior } from './ParticleBehaviorSystem';
 
 
 import { 
@@ -550,6 +550,74 @@ class EnhancedParticleEmitter {
     return true;
   }
 
+
+  // 新增：收集所有纹理路径
+  private collectTexturePaths(): string[] {
+    const paths: string[] = [];
+    const behaviors = [...this.config.behaviors, ...(this.config.globalBehaviors || [])]; // 支持globalBehaviors
+
+    for (const b of behaviors) {
+      if (b.type === 'textureSingle') {
+        if (typeof b.config.texture === 'string') {
+          paths.push(b.config.texture);
+        }
+      } else if (b.type === 'textureRandom' || b.type === 'textureOrdered') {
+        b.config.textures?.forEach((t: string | PIXI.Texture) => {
+          if (typeof t === 'string') paths.push(t);
+        });
+      } else if (b.type === 'animatedTexture') {
+        b.config.textureFrames?.forEach((t: string | PIXI.Texture) => {
+          if (typeof t === 'string') paths.push(t);
+        });
+      } else if (b.type === 'animatedTexture') { // 支持动画行为（如果有多个anims）
+        const anims = Array.isArray(b.config.anims) ? b.config.anims : [b.config];
+        anims.forEach((anim: any) => {
+          anim.textures?.forEach((t: string | PIXI.Texture) => {
+            if (typeof t === 'string') paths.push(t);
+          });
+        });
+      }
+      // 可以扩展支持其他自定义行为类型
+    }
+
+    return [...new Set(paths)]; // 去重
+  }
+
+  
+  // 新增：异步初始化纹理
+  async initTextures(): Promise<void> {
+    const paths = this.collectTexturePaths();
+    await TextureManager.loadAll(paths);
+    this.replaceTextureStrings();
+  }
+  
+    // 新增：替换config中的字符串为已加载的Texture
+    private replaceTextureStrings(): void {
+      const behaviors = [...this.config.behaviors, ...(this.config.globalBehaviors || [])];
+  
+      for (const b of behaviors) {
+        if (b.type === 'textureSingle') {
+          if (typeof b.config.texture === 'string') {
+            b.config.texture = TextureManager.get(b.config.texture) || PIXI.Texture.EMPTY;
+          }
+        } else if (b.type === 'textureRandom' || b.type === 'textureOrdered') {
+          b.config.textures = b.config.textures?.map((t: string | PIXI.Texture) =>
+            typeof t === 'string' ? (TextureManager.get(t) || PIXI.Texture.EMPTY) : t
+          );
+        } else if (b.type === 'animatedTexture') { // 支持动画
+          const anims = Array.isArray(b.config.anims) ? b.config.anims : [b.config];
+          anims.forEach((anim: any) => {
+            anim.textures = anim.textures?.map((t: string | PIXI.Texture) =>
+              typeof t === 'string' ? (TextureManager.get(t) || PIXI.Texture.EMPTY) : t
+            );
+          });
+        }
+        // 扩展其他类型
+      }
+    }
+
+    
+
   // 生成粒子
   spawnParticles() {
     // 检查是否达到最大粒子数
@@ -726,68 +794,67 @@ export const ParticleSystemEnhanced = ({
   const emitterRef = useRef<EnhancedParticleEmitter | null>(null);
   const lastTimeRef = useRef<number>(Date.now());
   const completedRef = useRef<boolean>(false);
+  const [loaded, setLoaded] = useState(false); // 新增：加载状态
 
-  // 初始化发射器
+  // 初始化发射器并异步加载纹理
   useEffect(() => {
     if (!containerRef.current) return;
-    
+
     // 清理旧的发射器
     if (emitterRef.current) {
       emitterRef.current.destroy();
     }
-    
-    // 创建新的发射器
+
     const emitter = new EnhancedParticleEmitter(containerRef.current, {
       ...config,
-      pos: {
-        x: 0, // 相对于容器的位置
-        y: 0
+      pos: { x: 0, y: 0 }
+    });
+
+    // 异步加载纹理
+    emitter.initTextures().then(() => {
+      setLoaded(true);
+      emitterRef.current = emitter;
+
+      // 设置发射器状态
+      if (play) {
+        emitter.start();
+      } else {
+        emitter.stop();
       }
     });
-    
-    emitterRef.current = emitter;
-    
-    // 设置发射器状态
-    if (play) {
-      emitter.start();
-    } else {
-      emitter.stop();
-    }
-    
+
     return () => {
       if (emitterRef.current) {
         emitterRef.current.destroy();
       }
+      setLoaded(false);
     };
   }, [config]);
 
+
   // 处理播放状态变化
   useEffect(() => {
-    if (!emitterRef.current) return;
-    
+    if (!emitterRef.current || !loaded) return; // 等待加载完成
+
     if (play) {
       emitterRef.current.start();
       completedRef.current = false;
     } else {
       emitterRef.current.stop();
     }
-  }, [play]);
+  }, [play, loaded]);
 
   // 使用 useTick 更新粒子
   useTick(() => {
-    if (!emitterRef.current) return;
-    
+    if (!emitterRef.current || !loaded) return; // 等待加载完成
+
     const now = Date.now();
-    const deltaTime = (now - lastTimeRef.current) / 1000; // 转换为秒
+    const deltaTime = (now - lastTimeRef.current) / 1000;
     lastTimeRef.current = now;
-    
-    // 限制最大帧时间，防止大延迟导致粒子跳跃
     const clampedDelta = Math.min(deltaTime, 0.1);
-    
-    // 更新发射器
+
     const active = emitterRef.current.update(clampedDelta);
-    
-    // 检查是否完成
+
     if (!active && !completedRef.current && onComplete) {
       completedRef.current = true;
       onComplete();
@@ -796,9 +863,7 @@ export const ParticleSystemEnhanced = ({
 
   return (
     <pixiContainer 
-      ref={(container) => {
-        containerRef.current = container;
-      }}
+      ref={(container) => { containerRef.current = container; }}
       position={{x: position[0], y: position[1]}}
       scale={{x: scale, y: scale}}
     />

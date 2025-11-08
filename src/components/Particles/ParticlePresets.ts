@@ -137,40 +137,16 @@ export const fireEffect: ParticleConfig = {
           affectRotation: false
         }
       }
+    },
+    {
+      type: 'textureRandom',
+      config: {
+        textures: ['assets/particle.png', 'assets/Fire.png'] // 字符串路径，会自动加载
+      }
     }
   ]
 };
 
-// 创建带纹理的火焰效果
-export const createFireTextureEffect = (textures: string[] | PIXI.Texture[]): ParticleConfig => {
-  const baseConfig = {...fireEffect};
-  
-  // 添加纹理行为
-  baseConfig.behaviors.push({
-    type: 'textureRandom',
-    config: {
-      textures: textures
-    }
-  });
-  
-  return baseConfig;
-};
-
-
-
-export const createWaterTextureEffect = (textures: string[] | PIXI.Texture[]): ParticleConfig => {
-  const baseConfig = {...waterEffect};
-  
-  // 添加纹理行为
-  baseConfig.behaviors.push({
-    type: 'textureRandom',  
-    config: {
-      textures: textures
-    }
-  });
-  
-  return baseConfig;
-};
 
 // 水效果
 export const waterEffect: ParticleConfig = {
@@ -275,7 +251,14 @@ export const waterEffect: ParticleConfig = {
           affectRotation: true
         }
       }
+    },
+    {
+      type: 'textureRandom',
+      config: {
+        textures: ['assets/Sparks.png'] // 字符串路径，会自动加载
+      }
     }
+
 
 
 
