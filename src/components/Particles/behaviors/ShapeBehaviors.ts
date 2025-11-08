@@ -300,8 +300,8 @@ export class PolygonShapeBehavior implements IBehavior {
     // 选择随机线段位置
     const rand = Math.random() * this.totalLength;
     let chosenSeg;
-    let lerp;
-    
+    let lerp: number = 0;
+
     // 如果只有一个线段，直接选择
     if (this.segments.length === 1) {
       chosenSeg = this.segments[0];

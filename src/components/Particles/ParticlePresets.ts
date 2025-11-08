@@ -486,16 +486,21 @@ export const magicEffect: ParticleConfig = {
       }
     },
     {
-      type: 'spawnShape',
+      type: 'polygonalChain',
       config: {
-        type: 'torus',
-        data: {
-          x: 0,
-          y: 0,
-          radius: 30
-        }
+        data: [ // 定义矩形边缘的多边形链（点数组）
+          // 创建一个圆形冲击波形状
+          Array.from({ length: 16 }).map((_, i) => {
+            const angle = (i / 16) * Math.PI * 2;
+            return { 
+              x: Math.cos(angle) * 50, 
+              y: Math.sin(angle) * 50 
+            };
+          })
+          
+        ]
       }
-    }
+    },
   ]
 };
 
@@ -723,14 +728,14 @@ export const arrowParticleEffect: ParticleConfig = {
 // 在 ParticlePresets.ts 中添加
 export const edgeEffect: ParticleConfig = {
   lifetime: {
-    min: 1,
-    max: 1.5
+    min: 0.5,
+    max: 1
   },
-  frequency: 0.02,
+  frequency: 0.1,
   spawnChance: 1,
-  particlesPerWave: 1,
-  emitterLifetime: 0, // 无限
-  maxParticles: 100,
+  particlesPerWave: 1,  // 增加每波粒子数量
+  emitterLifetime: 0,  // 限制发射时间，使其像一次性斩击
+  maxParticles: 200,
   pos: {
     x: 0,
     y: 0
@@ -743,12 +748,12 @@ export const edgeEffect: ParticleConfig = {
         alpha: {
           list: [
             {
-              value: 0,
+              value: 0.8,
               time: 0
             },
             {
-              value: 0.8,
-              time: 0.2
+              value: 0.3,
+              time: 0.5
             },
             {
               value: 0,
@@ -764,15 +769,15 @@ export const edgeEffect: ParticleConfig = {
         scale: {
           list: [
             {
-              value: 0.2,
+              value: 0.1,
               time: 0
             },
             {
               value: 0.5,
-              time: 0.5
+              time: 0.2
             },
             {
-              value: 0.2,
+              value: 0.3,
               time: 1
             }
           ],
@@ -785,15 +790,15 @@ export const edgeEffect: ParticleConfig = {
         color: {
           list: [
             {
-              value: "9966ff",
+              value: "ffffff",  // 开始为白色
               time: 0
             },
             {
-              value: "cc99ff",
-              time: 0.5
+              value: "00ffff",  // 中间为青色
+              time: 0.3
             },
             {
-              value: "ffffff",
+              value: "0088ff",  // 结束为蓝色
               time: 1
             }
           ],
@@ -806,11 +811,11 @@ export const edgeEffect: ParticleConfig = {
         speed: {
           list: [
             {
-              value: 50,
+              value: 300,  // 开始速度快
               time: 0
             },
             {
-              value: 30,
+              value: 100,  // 逐渐减慢
               time: 1
             }
           ],
@@ -821,24 +826,26 @@ export const edgeEffect: ParticleConfig = {
     {
       type: 'rotationStatic',
       config: {
-        min: 0,
-        max: 360
+        min: -10,
+        max: 10
       }
     },
     {
-      type: 'polygonalChain',
+      type: 'spawnShape',
       config: {
-        data: [ // 定义矩形边缘的多边形链（点数组）
-          // 创建一个圆形冲击波形状
-          Array.from({ length: 16 }).map((_, i) => {
-            const angle = (i / 16) * Math.PI * 2;
-            return { 
-              x: Math.cos(angle) * 50, 
-              y: Math.sin(angle) * 50 
-            };
-          })
-          
-        ]
+        type: 'rect',
+        data: {
+          x: 0,
+          y: 0,
+          w: 10,  // 窄矩形，像一条线
+          h: 100  // 高度较大，形成斩击的长度
+        }
+      }
+    },
+    {
+      type: 'textureRandom',
+      config: {
+        textures: ['assets/slash.png']  // 使用斩击纹理
       }
     },
   ]
