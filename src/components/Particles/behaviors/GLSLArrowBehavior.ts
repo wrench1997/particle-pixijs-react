@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // src/components/Particles/behaviors/GLSLArrowBehavior.ts
 import type { IBehavior } from '../ParticleBehaviorSystem';
 import { BehaviorPriority } from '../ParticleBehaviorSystem';
@@ -171,7 +173,7 @@ private adjustCameraBasedOnTarget(): void {
 
   }
   
-  update(particle: any, deltaTime: number, progress: number): void {
+  update(_particle: any, _deltaTime: number, _progress: number): void {
     // 这个方法不会用于更新单个粒子
     
   }

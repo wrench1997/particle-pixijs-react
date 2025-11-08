@@ -567,10 +567,6 @@ class EnhancedParticleEmitter {
         b.config.textures?.forEach((t: string | PIXI.Texture) => {
           if (typeof t === 'string') paths.push(t);
         });
-      } else if (b.type === 'animatedTexture') {
-        b.config.textureFrames?.forEach((t: string | PIXI.Texture) => {
-          if (typeof t === 'string') paths.push(t);
-        });
       } else if (b.type === 'animatedTexture') { // 支持动画行为（如果有多个anims）
         const anims = Array.isArray(b.config.anims) ? b.config.anims : [b.config];
         anims.forEach((anim: any) => {

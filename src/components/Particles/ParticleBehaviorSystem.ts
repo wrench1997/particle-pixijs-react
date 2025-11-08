@@ -4,18 +4,18 @@
 import * as PIXI from 'pixi.js';
 import { Assets } from 'pixi.js';
 
-export enum BehaviorPriority {
+export const BehaviorPriority = {
   // 生成行为（如形状生成）
-  SPAWN = 0,
-  // 变换行为（如旋转、缩放）
-  TRANSFORM = 10,
+  SPAWN: 0,
+  // 变换行为（如旋转、缩放） 
+  TRANSFORM: 10,
   // 移动行为（如速度、加速度）
-  MOVEMENT = 20,
+  MOVEMENT: 20,
   // 外观行为（如颜色、透明度）
-  APPEARANCE = 30,
+  APPEARANCE: 30,
   // 特殊行为（如碰撞、生命周期）
-  SPECIAL = 40
-}
+  SPECIAL: 40
+} as const;
 
 export interface IBehavior {
   type: string;
