@@ -11,7 +11,6 @@ import { behaviorRegistry, ObjectPool, TextureManager, type IBehavior } from './
 import { 
   AlphaBehavior, ScaleBehavior, ColorBehavior, 
    RotationStaticBehavior,
-  TextureBehavior 
 } from './behaviors/BaseBehaviors';
 
 import {
@@ -22,7 +21,7 @@ import {
 import { SpawnShapeBehavior, PolygonShapeBehavior, ImageShapeBehavior } from './behaviors/ShapeBehaviors';
 
 // 导入其他行为，并使用别名避免冲突
-import { TextureRandomBehavior } from './behaviors/TextureBehaviors';
+import { TextureRandomBehavior,TextureBehavior } from './behaviors/TextureBehaviors';
 import { RotationBehavior } from './behaviors/RotationBehaviors';
 import {
   MoveSpeedStaticBehavior,

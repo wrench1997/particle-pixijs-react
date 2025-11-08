@@ -91,23 +91,3 @@ export class RotationStaticBehavior implements IBehavior {
   }
 }
 
-// 纹理行为
-export class TextureBehavior implements IBehavior {
-  cleanup: any;
-  updateGlobal: any;
-  initParticles?(first: any): void {
-    throw new Error('Method not implemented.');
-  }
-  type = 'textureSingle';
-  order = BehaviorPriority.APPEARANCE + 3;
-  
-  init(particle: any, config: any): void {
-    if (config.texture) {
-      particle.texture = config.texture;
-    }
-  }
-
-  update(particle: any, deltaTime: number, progress: number): void {
-    // 纹理不需要更新
-  }
-}

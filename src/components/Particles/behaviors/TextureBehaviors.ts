@@ -14,7 +14,6 @@ interface RandomTextureBehaviorConfig {
 /**
  * 随机纹理行为 - 为每个粒子随机分配一个纹理
  */
-
 export class TextureRandomBehavior implements IBehavior {
     type = 'textureRandom';
     order = BehaviorPriority.APPEARANCE + 2; // 优先级 32
@@ -51,3 +50,33 @@ export class TextureRandomBehavior implements IBehavior {
     }
 }
 
+/**
+ * 单一纹理行为 - 为所有粒子分配同一个纹理
+ */
+export class TextureBehavior implements IBehavior {
+  cleanup: any;
+  updateGlobal: any;
+  initParticles?(first: any): void {
+    throw new Error('Method not implemented.');
+  }
+  type = 'textureSingle';
+  private texture: PIXI.Texture | null = null;
+  order = BehaviorPriority.APPEARANCE + 3;
+  
+  init(particle: any, config: any): void {
+    // 处理不同的纹理配置方式
+    if (config.texture) {
+      // 如果传入的是单个纹理
+      this.texture = config.texture;
+    } 
+    
+    // 将纹理应用到粒子
+    if (this.texture) {
+      particle.texture = this.texture;
+    }
+  }
+
+  update(particle: any, deltaTime: number, progress: number): void {
+    // 纹理不需要更新
+  }
+}

@@ -1,9 +1,6 @@
 // src/components/Particles/ParticlePresets.ts
 // src/components/Particles/ParticlePresets.ts
 import type { ParticleConfig } from './ParticleSystemEnhanced';
-import * as PIXI from 'pixi.js';
-
-
 
 
 
@@ -504,103 +501,6 @@ export const magicEffect: ParticleConfig = {
   ]
 };
 
-// 创建带纹理的粒子效果
-export const createTextureEffect = (texture: PIXI.Texture): ParticleConfig => {
-  return {
-    lifetime: {
-      min: 0.6,
-      max: 0.8
-    },
-    frequency: 0.01,
-    spawnChance: 1,
-    particlesPerWave: 1,
-    emitterLifetime: 0, // 无限
-    maxParticles: 100,
-    pos: {
-      x: 0,
-      y: 0
-    },
-    addAtBack: false,
-    behaviors: [
-      {
-        type: 'alpha',
-        config: {
-          alpha: {
-            list: [
-              {
-                value: 0.8,
-                time: 0
-              },
-              {
-                value: 0.1,
-                time: 1
-              }
-            ],
-          },
-        }
-      },
-      {
-        type: 'scale',
-        config: {
-          scale: {
-            list: [
-              {
-                value: 1,
-                time: 0
-              },
-              {
-                value: 0.3,
-                time: 1
-              }
-            ],
-          },
-        }
-      },
-      {
-        type: 'moveSpeed',
-        config: {
-          speed: {
-            list: [
-              {
-                value: 100,
-                time: 0
-              },
-              {
-                value: 50,
-                time: 1
-              }
-            ],
-            isStepped: false
-          },
-        }
-      },
-      {
-        type: 'rotationStatic',
-        config: {
-          min: 0,
-          max: 360
-        }
-      },
-      {
-        type: 'spawnShape',
-        config: {
-          type: 'torus',
-          data: {
-            x: 0,
-            y: 0,
-            radius: 20
-          }
-        }
-      },
-      {
-        type: 'textureSingle',
-        config: {
-          texture: texture
-        }
-      }
-    ]
-  };
-};
 
 
 
@@ -843,9 +743,9 @@ export const edgeEffect: ParticleConfig = {
       }
     },
     {
-      type: 'textureRandom',
+      type: 'textureSingle',
       config: {
-        textures: ['assets/slash.png']  // 使用斩击纹理
+        texture: 'assets/slash.png' // 使用斩击纹理
       }
     },
   ]
