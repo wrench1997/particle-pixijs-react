@@ -28,28 +28,13 @@ yarn add pixi.js @pixi/react
 ```tsx
 import { Application } from '@pixi/react';
 import { ParticleSystemEnhanced } from './components/Particles/ParticleSystemEnhanced';
-import { createFireTextureEffect } from './components/Particles/ParticlePresets';
-import { useEffect, useState } from 'react';
-import { Assets, Texture } from 'pixi.js';
+import { fireEffect } from './components/Particles/ParticlePresets';
 
-export default function TexturedParticles() {
-  const [texture, setTexture] = useState<Texture | null>(null);
-  
-  useEffect(() => {
-    const loadTexture = async () => {
-      const tex = await Assets.load('assets/particle.png');
-      setTexture(tex);
-    };
-    
-    loadTexture();
-  }, []);
-  
-  if (!texture) return null;
-  
+export default function BasicParticles() {
   return (
     <Application width={800} height={600} options={{ background: 0x000000 }}>
       <ParticleSystemEnhanced
-        config={createFireTextureEffect([texture])}
+        config={fireEffect}
         play={true}
         position={[400, 300]}
         scale={1.0}
@@ -148,6 +133,7 @@ const config = {
 | `waterEffect` | 水涌动特效 |
 | `explosionEffect` | 爆炸特效 |
 | `magicEffect` | 魔法闪烁 |
+| `arrowParticleEffect`  | 3D箭矢特效 |
 ---
 
 ## 🎮 实时控制（ParticleDemo 内置）
@@ -175,34 +161,36 @@ const config = {
 ## 纹理加载
 新版本支持异步加载纹理并应用到粒子系统：
 
+
 ```ts
-// 在 ParticleDemo 中的纹理加载示例
-useEffect(() => {
-  const loadTextures = async () => {
-    try {
-      // 使用 Assets.load 异步加载纹理
-      const [particle, fire] = await Promise.all([
-        Assets.load('assets/particle.png'),
-        Assets.load('assets/Fire.png'),
-      ]);
-      
-      setParticleTexture(particle);
-      setFireTexture(fire);
-      setTexturesLoaded(true);
-    } catch (error) {
-      console.error('纹理加载失败:', error);
-    }
-  };
-  
-  loadTextures();
-}, []);
+// 在 ParticleConfig 中直接使用纹理路径字符串
+{
+  type: 'textureSingle',
+  config: {
+    texture: 'assets/particle.png'  // 自动加载并应用
+  }
+}
+
+// 或者使用纹理数组
+{
+  type: 'textureRandom',
+  config: {
+    textures: ['assets/particle1.png', 'assets/particle2.png']  // 自动加载并应用
+  }
+}
 ```
+
+## 系统会自动：
+1. 收集所有行为中的纹理路径
+2. 异步加载所有纹理
+3. 替换配置中的路径为已加载的纹理对象
+4. 完成后再开始渲染粒子
 
 
 ## 🧾 提示与调试建议
 
-1. 确认粒子纹理（例如 `assets/Bubbles99.png`）路径正确；
-2. 调整 `maxParticles`、`frequency` 获取理想性能；
+1. 确认纹理路径正确，系统会自动加载纹理；
+2. 调整 maxParticles、frequency 获取理想性能；
 3. 为高性能场景应避免使用透明度叠加过多；
 4. 可结合调试工具（如 Chrome Pixi DevTools）分析渲染性能；
 5. 用多个 `ParticleSystemEnhanced` 叠加实现多层效果。
