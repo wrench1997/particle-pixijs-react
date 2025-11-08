@@ -9,6 +9,7 @@ import * as PIXI from 'pixi.js';
 
 
 
+
 // src/components/Particles/ParticlePresets.ts 中添加火焰效果配置
 
 // 火焰效果
@@ -141,14 +142,14 @@ export const fireEffect: ParticleConfig = {
 };
 
 // 创建带纹理的火焰效果
-export const createFireTextureEffect = (textures: PIXI.Texture | PIXI.Texture[]): ParticleConfig => {
+export const createFireTextureEffect = (textures: string[] | PIXI.Texture[]): ParticleConfig => {
   const baseConfig = {...fireEffect};
   
   // 添加纹理行为
   baseConfig.behaviors.push({
     type: 'textureRandom',
     config: {
-      textures: Array.isArray(textures) ? textures : [textures]
+      textures: textures
     }
   });
   
@@ -157,20 +158,19 @@ export const createFireTextureEffect = (textures: PIXI.Texture | PIXI.Texture[])
 
 
 
-export const createWaterTextureEffect = (textures: PIXI.Texture | PIXI.Texture[]): ParticleConfig => {
+export const createWaterTextureEffect = (textures: string[] | PIXI.Texture[]): ParticleConfig => {
   const baseConfig = {...waterEffect};
   
   // 添加纹理行为
   baseConfig.behaviors.push({
-    type: 'textureRandom',
+    type: 'textureRandom',  
     config: {
-      textures: Array.isArray(textures) ? textures : [textures]
+      textures: textures
     }
   });
   
   return baseConfig;
 };
-
 
 // 水效果
 export const waterEffect: ParticleConfig = {
@@ -276,6 +276,9 @@ export const waterEffect: ParticleConfig = {
         }
       }
     }
+
+
+
   ]
 };
 
@@ -733,4 +736,128 @@ export const arrowParticleEffect: ParticleConfig = {
 
 
 
+
+// 在 ParticlePresets.ts 中添加
+export const edgeEffect: ParticleConfig = {
+  lifetime: {
+    min: 1,
+    max: 1.5
+  },
+  frequency: 0.02,
+  spawnChance: 1,
+  particlesPerWave: 1,
+  emitterLifetime: 0, // 无限
+  maxParticles: 100,
+  pos: {
+    x: 0,
+    y: 0
+  },
+  addAtBack: false,
+  behaviors: [
+    {
+      type: 'alpha',
+      config: {
+        alpha: {
+          list: [
+            {
+              value: 0,
+              time: 0
+            },
+            {
+              value: 0.8,
+              time: 0.2
+            },
+            {
+              value: 0,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'scale',
+      config: {
+        scale: {
+          list: [
+            {
+              value: 0.2,
+              time: 0
+            },
+            {
+              value: 0.5,
+              time: 0.5
+            },
+            {
+              value: 0.2,
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'color',
+      config: {
+        color: {
+          list: [
+            {
+              value: "9966ff",
+              time: 0
+            },
+            {
+              value: "cc99ff",
+              time: 0.5
+            },
+            {
+              value: "ffffff",
+              time: 1
+            }
+          ],
+        },
+      }
+    },
+    {
+      type: 'moveSpeed',
+      config: {
+        speed: {
+          list: [
+            {
+              value: 50,
+              time: 0
+            },
+            {
+              value: 30,
+              time: 1
+            }
+          ],
+          isStepped: false
+        },
+      }
+    },
+    {
+      type: 'rotationStatic',
+      config: {
+        min: 0,
+        max: 360
+      }
+    },
+    {
+      type: 'polygonalChain',
+      config: {
+        data: [ // 定义矩形边缘的多边形链（点数组）
+          // 创建一个圆形冲击波形状
+          Array.from({ length: 16 }).map((_, i) => {
+            const angle = (i / 16) * Math.PI * 2;
+            return { 
+              x: Math.cos(angle) * 50, 
+              y: Math.sin(angle) * 50 
+            };
+          })
+          
+        ]
+      }
+    },
+  ]
+};
 

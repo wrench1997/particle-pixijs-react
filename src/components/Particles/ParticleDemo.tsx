@@ -6,7 +6,7 @@ import { extend } from '@pixi/react';
 // 导入增强版粒子系统
 import { ParticleSystemEnhanced, type ParticleConfig } from './ParticleSystemEnhanced';
 import { 
-  fireEffect, createFireTextureEffect,createWaterTextureEffect, waterEffect, explosionEffect, 
+  fireEffect, createFireTextureEffect,createWaterTextureEffect, waterEffect, edgeEffect, 
   magicEffect, arrowParticleEffect 
 } from './ParticlePresets';
 
@@ -97,7 +97,7 @@ export const ParticleDemo = () => {
       case 'water': return waterTexture? 
       [createWaterTextureEffect([waterTexture])] : 
       [waterEffect];
-      case 'explosion': return [explosionEffect];
+      case 'edgeEffect': return [edgeEffect];
       case 'magic': return [magicEffect];
       case 'arrow': return [arrowParticleEffect]; // 新增
       default: return [magicEffect];
@@ -171,7 +171,7 @@ export const ParticleDemo = () => {
         interactive={true}
         cursor="pointer"
         position={{x: 20, y: 20}}>
-          {['fire', 'water', 'explosion', 'magic','arrow'].map((effect, index) => (
+          {['fire', 'water', 'edgeEffect', 'magic','arrow'].map((effect, index) => (
             <pixiContainer
               key={effect}
               position={{x: index * 130, y: 0}}
